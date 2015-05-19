@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="page-header">Samples</h1>
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Upload date</th>
+                <th>VCF File</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sample in samples %}
+            <tr>
+                <td><a href="{{ url_for('sample_view', sample_id=sample.samples)}}">{{sample.samples}}</a></td>
+                <td>{{sample.upload_date}}</td>
+                <td>{{sample.vcf_file}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

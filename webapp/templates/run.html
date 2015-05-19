@@ -1,0 +1,47 @@
+{% import '_helpers.html' as helpers %}
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="page-header">{{run.name}}</h1>
+    <dl class="dl-horizontal">
+        <dt>Name</dt><dd>{{run.name}}</dd>
+        <dt>Upload date</dt><dd>{{run.upload_date}}</dd>
+        <dt>VCF</dt><dd>{{run.vcf_file}}</dd>
+        <dt>Filters</dt><dd>{{run.gatk.filters}}</dd>
+    </dl>
+    {{ helpers.render_pagination(pagination) }}
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Chr</th>
+                <th>Pos</th>
+                <th>Ref</th>
+                <th>Alt</th>
+                {% for sample in run.samples %}
+                <th>{{sample}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for variant in run_variants %}
+            {{variant}}
+            <tr>
+                <td>{{ variant.chr }}</td>
+                <td>{{ variant.pos }}</td>
+                <td>{{ variant.ref }}</td>
+                <td>{{ variant.alt }}</td>
+                {% for sample in run.samples %}
+                    <td>
+                    {% set sample_variant = variant.samples|selectattr("id","equalto",sample)|list %}
+                    {% set sample_variant = sample_variant[0] %}
+                    {% if sample_variant %}
+                        {{sample_variant.GT}}
+                        {{sample_variant.filter}}
+                    {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {{ helpers.render_pagination(pagination) }}
+{% endblock %}

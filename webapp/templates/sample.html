@@ -1,0 +1,31 @@
+{% import '_helpers.html' as helpers %}
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="page-header">{{ sample }}</h1>
+    Number of variants: {{variant_count}}
+    {{ helpers.render_pagination(pagination) }}
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Chr</th>
+                <th>Post</th>
+                <th>Ref</th>
+                <th>Alt</th>
+                <th>GT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for variant in sample_variants %}
+                <tr>
+                    <td>{{ variant.chr }}</td>
+                    <td>{{ variant.pos }}</td>
+                    <td>{{ variant.ref }}</td>
+                    <td>{{ variant.alt }}</td>
+                    <td>{{ variant.samples[0].GT}}</td>
+                    <td>{{ variant.samples[0]}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {{ helpers.render_pagination(pagination) }}
+{% endblock %}

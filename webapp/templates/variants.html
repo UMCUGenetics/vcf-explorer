@@ -1,0 +1,29 @@
+{% import '_helpers.html' as helpers %}
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="page-header">Variants</h1>
+    {{ helpers.render_pagination(pagination) }}
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Chromosome</th>
+                <th>Pos</th>
+                <th>Ref</th>
+                <th>Alt</th>
+                <th>ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for variant in variants %}
+            <tr>
+                <td>{{variant.chr}}</td>
+                <td>{{variant.pos}}</td>
+                <td>{{variant.ref}}</td>
+                <td>{{variant.alt}}</td>
+                <td><a href="{{ url_for('variant_view', variant_id=variant._id)}}">{{variant._id}}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {{ helpers.render_pagination(pagination) }}
+{% endblock %}
