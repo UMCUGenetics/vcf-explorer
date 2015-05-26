@@ -14,6 +14,9 @@ def loadvcf(args):
 def reset(args):
     utils.resetdb()
 
+def create_indexes(args):
+    utils.create_indexes()
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -29,10 +32,12 @@ if __name__ == "__main__":
     sp_runserver = sp.add_parser('runserver', parents=[server_port,server_host], help='Run flask development server')
     sp_vcf = sp.add_parser('vcf', parents=[vcf_file] ,help='Upload a vcf file to the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
+    sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
 
     sp_runserver.set_defaults(func=runserver)
     sp_vcf.set_defaults(func=loadvcf)
     sp_resetdb.set_defaults(func=reset)
+    sp_create_indexes.set_defaults(func=create_indexes)
 
     args = parser.parse_args()
     args.func(args)
