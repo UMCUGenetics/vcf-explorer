@@ -26,7 +26,15 @@ def run_view(run_name,page):
         {"$limit": page_size},
         {"$unwind": "$samples"},
         {"$match": {"samples.run": run_name}},
-        {"$group": {"_id":"$_id","samples":{"$push":"$samples"}}},
+        {"$group": {
+            "_id":"$_id",
+            "samples":{"$push":"$samples"},
+            "chr":{"$first":"$chr"},
+            "pos":{"$first":"$pos"},
+            "ref":{"$first":"$ref"},
+            "alt":{"$first":"$alt"},
+            }
+        },
     ]
 
     run_variants = list(db.variants.aggregate(pipeline))
@@ -49,7 +57,7 @@ def samples():
 @app.route('/samples/<sample_id>/<int:page>')
 def sample_view(sample_id, page):
     db = get_db()
-    db_filter = {'samples.id':sample_id}
+    db_filter = {'samples.id':sample_id, 'samples.filter': {'$exists': False}}
     db_projection = {'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1, 'samples': { '$elemMatch': { 'id': sample_id }}}
 
     page_size = 25
