@@ -22,12 +22,12 @@ if __name__ == "__main__":
 
     vcf_file = argparse.ArgumentParser(add_help=False)
     vcf_file.add_argument('vcf_file', help='path/to/file.vcf')
-    
+
     server_port = argparse.ArgumentParser(add_help=False)
     server_port.add_argument('-p','--port', default=5000, type=int, help='The port of the webserver.')
     server_host =argparse.ArgumentParser(add_help=False)
-    server_port.add_argument('-host','--hostname', default='0.0.0.0', help='The hostname to listen on.')
-    
+    server_port.add_argument('-host','--hostname', default='localhost', help='The hostname to listen on.')
+
     sp = parser.add_subparsers()
     sp_runserver = sp.add_parser('runserver', parents=[server_port,server_host], help='Run flask development server')
     sp_vcf = sp.add_parser('vcf', parents=[vcf_file] ,help='Upload a vcf file to the database')
