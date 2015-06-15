@@ -3,7 +3,7 @@
 from flask import render_template, request
 import pymongo
 
-from webapp import app, get_db
+from vcfexplorer import app, get_db
 from utils import Pagination
 
 @app.route('/')

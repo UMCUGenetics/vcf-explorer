@@ -26,10 +26,10 @@ def get_db():
     return g.mongodb_conn
 
 
-import webapp.views
-import webapp.utils
+import vcfexplorer.views
+import vcfexplorer.utils
 
-from webapp.api import api
+from vcfexplorer.api import api
 
 app.register_blueprint(api, url_prefix='/api')
 

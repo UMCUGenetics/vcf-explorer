@@ -2,7 +2,7 @@
 
 import argparse
 
-from webapp import app
+from vcfexplorer import app
 import utils
 
 def runserver(args):

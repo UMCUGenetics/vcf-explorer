@@ -3,7 +3,7 @@
 from math import ceil
 from flask import request, url_for
 
-from webapp import app
+from vcfexplorer import app
 
 @app.template_test()
 def equalto(value,other):
