@@ -3,36 +3,11 @@
 from flask import Flask, g
 import pymongo
 
+from vcfexplorer import frontend, api
+
 app = Flask(__name__)
-app.config.update(
-    MONGODB_HOST='localhost',
-    MONGODB_PORT=27017,
-    MONGODB_NAME='vcf_explorer',
-)
-
-def connect_db():
-    """
-    Connect to the database specified in the app config
-    """
-    connection = pymongo.MongoClient(host=app.config['MONGODB_HOST'], port=app.config['MONGODB_PORT'])
-    return connection[app.config['MONGODB_NAME']]
-
-def get_db():
-    """
-    Get or open database connection for the current application context
-    """
-    if not hasattr(g, 'mongodb_conn'):
-        g.mongodb_conn = connect_db()
-    return g.mongodb_conn
-
-
-import vcfexplorer.views
-import vcfexplorer.utils
-
-from vcfexplorer.api import api
-
-app.register_blueprint(api, url_prefix='/api')
-
+app.register_blueprint(frontend.bp, url_prefix='/')
+app.register_blueprint(api.bp, url_prefix='/api')
 
 if __name__ == '__main__':
     app.run()
