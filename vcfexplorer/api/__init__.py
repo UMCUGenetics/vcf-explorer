@@ -1,7 +1,12 @@
 from flask import Blueprint
+from flask_restful import Api, Resource
+
+from resources import HelloWorld
+from resources import Runs
 
 bp = Blueprint('api', __name__)
+api = Api(bp)
 
-@bp.route('/')
-def hello_world():
-    return 'hello_world'
+api.add_resource(HelloWorld, '/hello')
+
+api.add_resource(Runs, '/runs')
