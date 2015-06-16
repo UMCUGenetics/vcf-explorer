@@ -94,9 +94,7 @@ class Variants(restful.Resource):
         Todo: Implement pagination?
         """
         db = get_mongodb()
-        page_size = 25
-        page = 1
-        variants = db.variants.find().skip(page_size*(page-1)).limit(page_size)
+        variants = db.variants.find()
         return variants
 
 class Variant(restful.Resource):
