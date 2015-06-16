@@ -1,3 +1,9 @@
+"""
+    vcfexplorer.helpers
+
+    Helper functions for the api and frontend
+"""
+
 from flask import current_app, g
 from pymongo import MongoClient
 import json

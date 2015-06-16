@@ -1,27 +1,35 @@
+"""
+    vcfexplorer.api.resources
+
+    VCF Explorer api resources
+"""
+
 from flask_restful import Resource
 import pymongo
 
 from ..helpers import get_mongodb, to_json
 
 class Runs(Resource):
-    """
-    """
     def get(self):
+        """
+        Return all vcf datasets
+        Todo: Implement pagination?
+        """
         db = get_mongodb()
         runs = list(db.runs.find())
         return to_json(runs)
 
 class Run(Resource):
-    """
-    """
     def get(self):
         db = get_mongodb()
         return {'run': 1}
 
 class Samples(Resource):
-    """
-    """
     def get(self):
+        """
+        Return all samples
+        Todo: Implement pagination?
+        """
         db = get_mongodb()
         pipeline = [
             {"$unwind": "$samples"},
@@ -36,16 +44,16 @@ class Samples(Resource):
         return to_json(samples)
 
 class Sample(Resource):
-    """
-    """
     def get(self):
         db = get_mongodb()
         return {'sample': 1}
 
 class Variants(Resource):
-    """
-    """
     def get(self):
+        """
+        Return all variants
+        Todo: Implement pagination?
+        """
         db = get_mongodb()
         page_size = 25
         page = 1
@@ -53,7 +61,5 @@ class Variants(Resource):
         return to_json(variants)
 
 class Variant(Resource):
-    """
-    """
     def get(self):
         db = get_mongodb()
