@@ -6,7 +6,7 @@ from vcfexplorer import app
 import utils
 
 def runserver(args):
-    app.run(debug=True, host=args.hostname, port=args.port)
+    app.run(host=args.hostname, port=args.port)
 
 def loadvcf(args):
     utils.upload_vcf(args.vcf_file)

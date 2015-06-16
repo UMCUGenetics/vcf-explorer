@@ -6,15 +6,10 @@
 
 from flask import Flask
 
-from vcfexplorer import frontend, api
+from . import frontend, api
 
 app = Flask(__name__)
-#Todo: read config from file
-app.config.update(
-    MONGODB_HOST='localhost',
-    MONGODB_PORT=27017,
-    MONGODB_NAME='vcf_explorer',
-)
+app.config.from_object('config')
 
 app.register_blueprint(frontend.bp, url_prefix='/')
 app.register_blueprint(api.bp, url_prefix='/api')
