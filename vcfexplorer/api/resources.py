@@ -17,7 +17,11 @@ class Runs(restful.Resource):
         """
         db = get_mongodb()
         runs = db.runs.find()
-        return runs
+
+        if runs.count():
+            return runs
+        else:
+            restful.abort(404)
 
 class Run(restful.Resource):
     def get(self, run_name):
@@ -28,7 +32,10 @@ class Run(restful.Resource):
 
         run = db.runs.find_one({'name':run_name})
 
-        return run
+        if run:
+            return run
+        else:
+            restful.abort(404)
 
 class RunVariants(restful.Resource):
     def get(self, run_name):
@@ -53,7 +60,10 @@ class RunVariants(restful.Resource):
         ]
         run_variants = db.variants.aggregate(pipeline)
 
-        return run_variants
+        if run_variants.alive:
+            return run_variants
+        else:
+            restful.abort(404)
 
 class Samples(restful.Resource):
     def get(self):
@@ -62,6 +72,7 @@ class Samples(restful.Resource):
         Todo: Implement pagination?
         """
         db = get_mongodb()
+
         pipeline = [
             {"$unwind": "$samples"},
             {"$project" :
@@ -71,7 +82,11 @@ class Samples(restful.Resource):
                 "upload_date": 1 }
         }]
         samples = db.runs.aggregate(pipeline)
-        return samples
+
+        if samples.alive:
+            return samples
+        else:
+            restful.abort(404)
 
 class Sample(restful.Resource):
     def get(self, sample_id):
@@ -96,7 +111,10 @@ class SampleVariants(restful.Resource):
 
         sample_variants = db.variants.find(db_filter,db_projection)
 
-        return sample_variants
+        if sample_variants.count():
+            return sample_variants
+        else:
+            restful.abort(404)
 
 class Variants(restful.Resource):
     def get(self):
@@ -106,7 +124,11 @@ class Variants(restful.Resource):
         """
         db = get_mongodb()
         variants = db.variants.find()
-        return variants
+
+        if variants.count():
+            return variants
+        else:
+            restful.abort(404)
 
 class Variant(restful.Resource):
     def get(self, variant_id):
@@ -117,7 +139,10 @@ class Variant(restful.Resource):
 
         variant = db.variants.find_one({'_id':variant_id})
 
-        return variant
+        if variant:
+            return variant
+        else:
+            restful.abort(404)
 
 class Root(restful.Resource):
     def get(self):
