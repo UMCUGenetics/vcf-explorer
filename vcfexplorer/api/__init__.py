@@ -28,13 +28,13 @@ def output_json(data, code, headers=None):
 # Add api resources
 api.add_resource(Root, '/')
 
-api.add_resource(Runs, '/runs')
-api.add_resource(Run, '/runs/<string:run_name>')
-api.add_resource(RunVariants, '/runs/<string:run_name>/variants')
+api.add_resource(Runs, '/runs/')
+api.add_resource(Run, '/runs/<string:run_name>/')
+api.add_resource(RunVariants, '/runs/<string:run_name>/variants/')
 
-api.add_resource(Samples, '/samples')
-api.add_resource(Sample, '/samples/<string:sample_id>')
-api.add_resource(SampleVariants, '/samples/<string:sample_id>/variants')
+api.add_resource(Samples, '/samples/')
+api.add_resource(Sample, '/samples/<string:sample_id>/')
+api.add_resource(SampleVariants, '/samples/<string:sample_id>/variants/')
 
-api.add_resource(Variants, '/variants')
-api.add_resource(Variant, '/variants/<string:variant_id>')
+api.add_resource(Variants, '/variants/')
+api.add_resource(Variant, '/variants/<string:variant_id>/')
