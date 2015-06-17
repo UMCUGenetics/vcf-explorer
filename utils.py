@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+"""
+    utils.py
+
+    Utility functions used in manage.py
+"""
+
 import re
 from datetime import datetime
 import sys
@@ -11,13 +16,18 @@ connection = pymongo.MongoClient("mongodb://localhost")
 filter_re = re.compile('(?:##FILTER=<ID=)(\w+)(?:,Description=")(.+)(?:">)')
 
 def upload_vcf(vcf_file):
+    """
+    Parse and upload vcf file.
+
+    Todo: Parse sample metadata available in vcf?
+    """
     db = connection.vcf_explorer
     variants = db.variants
     runs = db.runs
-    
+
     run_name = vcf_file.split('/')[-1]
     run_name = run_name.replace(".vcf","")
-    
+
     if runs.find({'name':run_name}).limit(1).count() > 0:
         sys.exit("Error: Duplicate vcf.")
 
@@ -84,7 +94,7 @@ def upload_vcf(vcf_file):
                 }
             )
             variant_count += 1
-            if variant_count == 50000:
+            if variant_count == 50000: #Upload variants in bulk -> benchmark?!
                 bulk_variants.execute()
                 bulk_variants = variants.initialize_unordered_bulk_op()
                 variant_count = 0
@@ -106,6 +116,11 @@ def upload_vcf(vcf_file):
     runs.insert_one(run)
 
 def create_indexes():
+    """
+    Create mongodb indexes.
+
+    Todo: Move or copy to vcfexplorer flask app? On start of webapp -> make sure indexes are created.
+    """
     db = connection.vcf_explorer
     variants = db.variants
     runs = db.runs
@@ -119,7 +134,8 @@ def create_indexes():
     variants.create_index([("samples.id", pymongo.ASCENDING),("samples.filter", pymongo.ASCENDING)], sparse=True)
 
 def resetdb():
+    """
+    Drop database and recreate indexes.
+    """
     connection.drop_database('vcf_explorer')
     create_indexes()
-
-

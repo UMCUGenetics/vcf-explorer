@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+    manage.py
+
+    VCF Explorer management application.
+    Todo: Use flask extension -> see feedly?
+"""
+
 import argparse
 
 from vcfexplorer import app
