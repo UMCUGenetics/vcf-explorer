@@ -10,7 +10,7 @@ from bson import json_util
 
 from .resources import Root
 from .resources import Runs, Run, RunVariants
-from .resources import Samples, SampleVariants
+from .resources import Samples, Sample, SampleVariants
 from .resources import Variants, Variant
 
 bp = Blueprint('api', __name__)
@@ -33,7 +33,8 @@ api.add_resource(Run, '/runs/<string:run_name>')
 api.add_resource(RunVariants, '/runs/<string:run_name>/variants')
 
 api.add_resource(Samples, '/samples')
-api.add_resource(SampleVariants, '/samples/<string:sample_id>')
+api.add_resource(Sample, '/samples/<string:sample_id>')
+api.add_resource(SampleVariants, '/samples/<string:sample_id>/variants')
 
 api.add_resource(Variants, '/variants')
 api.add_resource(Variant, '/variants/<string:variant_id>')

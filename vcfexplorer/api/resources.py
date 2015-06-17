@@ -22,7 +22,7 @@ class Runs(restful.Resource):
 class Run(restful.Resource):
     def get(self, run_name):
         """
-        Return run data from runs collection
+        Return run metadata from runs collection
         """
         db = get_mongodb()
 
@@ -72,6 +72,17 @@ class Samples(restful.Resource):
         }]
         samples = db.runs.aggregate(pipeline)
         return samples
+
+class Sample(restful.Resource):
+    def get(self, sample_id):
+        """
+        Return sample metadata from run collection?
+        Todo: Add metadata from samples to run collection.
+        """
+
+        db = get_mongodb()
+
+        return {'sample':sample_id} #placeholder
 
 class SampleVariants(restful.Resource):
     def get(self, sample_id):
