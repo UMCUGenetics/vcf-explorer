@@ -1,8 +1,6 @@
-{% import '_helpers.html' as helpers %}
 {% extends "base.html" %}
 {% block content %}
     <h1 class="page-header">Variants</h1>
-    {{ helpers.render_pagination(pagination) }}
     <table class="table table-condensed">
         <thead>
             <tr>
@@ -25,5 +23,4 @@
             {% endfor %}
         </tbody>
     </table>
-    {{ helpers.render_pagination(pagination) }}
 {% endblock %}

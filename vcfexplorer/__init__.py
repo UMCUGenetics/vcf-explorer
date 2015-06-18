@@ -8,7 +8,7 @@ from flask import Flask
 
 from . import frontend, api
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.config.from_object('config')
 
 app.register_blueprint(frontend.bp, url_prefix='/')

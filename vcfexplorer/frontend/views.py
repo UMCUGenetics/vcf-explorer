@@ -18,8 +18,8 @@ def runs():
 
 @bp.route('samples/')
 def samples():
-    return 'samples'
+    return render_template('samples.html')
 
 @bp.route('variants/')
 def variants():
-    return 'variants'
+    return render_template('variants.html')
