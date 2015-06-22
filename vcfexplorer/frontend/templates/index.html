@@ -5,6 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <base href="/">
         <title>VCF Explorer</title>
 
         <!-- Bootstrap -->
@@ -18,7 +19,7 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
     </head>
-    <body>
+    <body ng-app="vcfExplorerApp">
 
         <!-- Fixed navbar -->
         <nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
@@ -45,7 +46,7 @@
                     </ul>
                 </div>
                 <!-- CONTENT -->
-                <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <div ng-view class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                     PLACEHOLDER
                 </div>
             </div>
@@ -58,5 +59,8 @@
         <script src="/static/js/vendor/angular-route.min.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="/static/js/vendor/bootstrap.min.js"></script>
+
+        <!-- Angular VCF Explorer app -->
+        <script src="/static/js/app.js"></script>
     </body>
 </html>
