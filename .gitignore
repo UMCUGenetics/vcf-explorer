@@ -58,3 +58,6 @@ target/
 
 # Mongodb
 mongodb.conf
+
+# OSX
+.DS_Store
