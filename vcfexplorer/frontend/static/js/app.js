@@ -1,29 +1,28 @@
-var app = angular.module('vcfExplorerApp', ['ngRoute']);
+angular
+  .module('vcfExplorerApp', ['ngRoute'])
+  .config(function ($routeProvider, $locationProvider) {
 
-app.config(function ($routeProvider, $locationProvider) {
+    $routeProvider
+      .when('/', {
+        //controller: 'homeController',
+        templateUrl: '/static/partials/home.html'
+      })
+      .when('/runs', {
+        controller: 'runsController',
+        templateUrl: '/static/partials/runs.html'
+      })
+      .when('/samples', {
+        //controller: 'homeController',
+        templateUrl: '/static/partials/samples.html'
+      })
+      .when('/variants', {
+        //controller: 'homeController',
+        templateUrl: '/static/partials/variants.html'
+      })
+      .otherwise({
+        redirectTo: '/'
+      });
 
-  $routeProvider
-    .when('/', {
-      //controller: 'homeController',
-      templateUrl: '/static/partials/home.html'
-    })
-    .when('/runs', {
-      //controller: 'homeController',
-      templateUrl: '/static/partials/runs.html'
-    })
-    .when('/samples', {
-      //controller: 'homeController',
-      templateUrl: '/static/partials/samples.html'
-    })
-    .when('/variants', {
-      //controller: 'homeController',
-      templateUrl: '/static/partials/variants.html'
-    })
-    .otherwise({
-      redirectTo: '/'
-    });
-
-  // use the HTML5 History API
-  // $locationProvider.html5Mode(true);
-
+    // use the HTML5 History API
+    // $locationProvider.html5Mode(true);
 });
