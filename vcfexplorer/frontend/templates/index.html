@@ -39,23 +39,24 @@
                 <!-- MENU -->
                 <div class="col-sm-3 col-md-2 sidebar">
                     <ul class="nav nav-sidebar">
-                        <li {% if request.url_rule.endpoint == "runs" %}class="active"{% endif %}><a href="{{url_for('frontend.runs')}}">Runs</a></li>
-                        <li {% if request.url_rule.endpoint == "samples" %}class="active"{% endif %}><a href="{{url_for('frontend.samples')}}">Samples</a></li>
-                        <li {% if request.url_rule.endpoint == "variants" %}class="active"{% endif %}><a href="{{url_for('frontend.variants')}}">Variants</a></li>
+                        <li><a href="/runs">Runs</a></li>
+                        <li><a href="/samples">Samples</a></li>
+                        <li><a href="/variants">Variants</a></li>
                     </ul>
                 </div>
                 <!-- CONTENT -->
                 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                    {% block content %}{% endblock %}
+                    PLACEHOLDER
                 </div>
             </div>
         </div>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="/static/js/vendor/jquery.min.js"></script>
+        <!-- Angular v1.4.1-->
+        <script src="/static/js/vendor/angular.min.js"></script>
+        <script src="/static/js/vendor/angular-route.min.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="/static/js/bootstrap.min.js"></script>
-        <script src="/static/js/angular.min.js"></script>
-        <script src="/static/js/angular-route.min.js"></script>
+        <script src="/static/js/vendor/bootstrap.min.js"></script>
     </body>
 </html>
