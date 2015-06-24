@@ -12,11 +12,11 @@ angular
         templateUrl: '/static/partials/runs.html'
       })
       .when('/samples', {
-        //controller: 'homeController',
+        controller: 'samplesController',
         templateUrl: '/static/partials/samples.html'
       })
       .when('/variants', {
-        //controller: 'homeController',
+        controller: 'variantsController',
         templateUrl: '/static/partials/variants.html'
       })
       .otherwise({

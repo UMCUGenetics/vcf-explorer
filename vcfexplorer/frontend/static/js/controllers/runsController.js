@@ -5,8 +5,8 @@ angular
 runsController.$inject = ['runsService'];
 
 function runsController(runsService) {
-  var runs = this;
-  runs.data = []
+  var vm = this;
+  vm.data = []
 
   activate();
 
@@ -19,8 +19,8 @@ function runsController(runsService) {
   function getRuns() {
     return runsService.getRuns()
       .then(function(data) {
-        runs.data = data;
-        return runs.data;
+        vm.data = data;
+        return vm.data;
       });
   }
 };
