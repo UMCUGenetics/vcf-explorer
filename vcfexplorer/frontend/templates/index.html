@@ -11,7 +11,8 @@
         <!-- Bootstrap -->
         <link href="/static/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
         <link href="/static/css/vcf_explorer.css" rel="stylesheet" type="text/css">
-
+        <link href="/static/bower_components/ag-grid/dist/angular-grid.min.css" rel="stylesheet" type="text/css">
+        <link href="/static/bower_components/ag-grid/dist/theme-fresh.min.css" rel="stylesheet" type="text/css">
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -46,19 +47,18 @@
                     </ul>
                 </div>
                 <!-- CONTENT -->
-                <div ng-view class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                    PLACEHOLDER
-                </div>
+                <div ng-view class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"></div>
             </div>
         </div>
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <!-- jQuery and Bootstrap -->
         <script src="/static/bower_components/jquery/dist/jquery.min.js"></script>
-        <!-- Angular v1.4.1-->
+        <script src="/static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+        <!-- Angular v1.4.1 and vendor modules-->
         <script src="/static/bower_components/angular/angular.min.js"></script>
         <script src="/static/bower_components/angular-route/angular-route.min.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="/static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="/static/bower_components/ag-grid/dist/angular-grid.min.js"></script>
 
         <!-- Angular VCF Explorer app -->
         <script src="/static/js/app.js"></script>

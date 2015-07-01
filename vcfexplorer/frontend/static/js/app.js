@@ -1,5 +1,8 @@
 angular
-  .module('vcfExplorerApp', ['ngRoute'])
+  .module('vcfExplorerApp', [
+    'angularGrid',
+    'ngRoute'
+  ])
   .config(function ($routeProvider, $locationProvider) {
 
     $routeProvider
