@@ -8,7 +8,7 @@ function runsController(runsService) {
   var vm = this;
 
   var columnDefs = [
-    {headerName: "Name", field: "name"},
+    {headerName: "Name", field: "name", template: '<a href="/#/runs/{{data.name}}">{{data.name}}</a>'},
     {headerName: "VCF", field: "vcf_file"},
     {headerName: "Samples", field: "samples"}
   ];
@@ -16,6 +16,7 @@ function runsController(runsService) {
   vm.gridOptions = {
     columnDefs: columnDefs,
     rowData: null,
+    angularCompileRows: true,
     ready: function(){ activate(); }
   };
 

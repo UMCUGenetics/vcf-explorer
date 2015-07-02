@@ -14,6 +14,10 @@ angular
         controller: 'runsController',
         templateUrl: '/static/partials/runs.html'
       })
+      .when('/runs/:runName', {
+        controller: 'runController',
+        templateUrl: '/static/partials/run.html'
+      })
       .when('/samples', {
         controller: 'samplesController',
         templateUrl: '/static/partials/samples.html'
