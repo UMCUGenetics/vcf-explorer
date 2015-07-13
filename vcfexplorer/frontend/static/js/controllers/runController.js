@@ -36,6 +36,14 @@ function runController(runService, $routeParams) {
     });
   }
 
+  function getVariant(params) {
+    for (index=0, len=params.data.samples.length; index < len; ++index){
+      if(params.data.samples[index].id == params.colDef.field){
+        return params.data.samples[index].GT
+      };
+    };
+  };
+
   function getRun(runName) {
     return runService.getRun(runName)
       .then(function(data) {
@@ -43,11 +51,7 @@ function runController(runService, $routeParams) {
         // Add samples to columnDefs
         var index, len
         for (index=0, len=vm.run.samples.length; index < len; ++index){
-          // This probably does not work correctly.
-          // With 3 samples and 2 with a variant, then the representation is not correct anymore.
-          // How to get correct data out?
-          // Write valueGetter function, which gets data based on value of samples.id???
-          sampleColumnDef = { headerName: vm.run.samples[index], field:vm.run.samples[index], valueGetter: 'data.samples['+index+'].GT' };
+          sampleColumnDef = { headerName: vm.run.samples[index], field:vm.run.samples[index], valueGetter: getVariant };
           vm.gridOptions.columnDefs = vm.gridOptions.columnDefs.concat(sampleColumnDef);
         };
         vm.gridOptions.api.onNewCols();
