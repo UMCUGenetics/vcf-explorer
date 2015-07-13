@@ -11,7 +11,6 @@ function runsController(runsService) {
     {headerName: "Name", field: "name", cellRenderer: function(params) {
       return '<a href="/#/runs/'+params.data.name+'">'+params.data.name+'</a>';
     }},
-    //template: '<a href="/#/runs/{{data.name}}">{{data.name}}</a>'},
     {headerName: "VCF", field: "vcf_file"},
     {headerName: "Samples", field: "samples"}
   ];
