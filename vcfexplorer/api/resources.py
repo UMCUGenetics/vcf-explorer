@@ -106,7 +106,7 @@ class SampleVariants(restful.Resource):
         """
         db = get_mongodb()
 
-        db_filter = {'samples.id':sample_id, 'samples.filter': {'$exists': False}}
+        db_filter = {'samples.id':sample_id} #'samples.filter': {'$exists': False}}
         db_projection = {'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1, 'samples': { '$elemMatch': { 'id': sample_id }}}
 
         sample_variants = db.variants.find(db_filter,db_projection)
