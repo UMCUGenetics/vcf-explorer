@@ -22,6 +22,10 @@ angular
         controller: 'samplesController',
         templateUrl: '/static/partials/samples.html'
       })
+      .when('/samples/:sampleName', {
+        controller: 'sampleController',
+        templateUrl: '/static/partials/sample.html'
+      })
       .when('/variants', {
         controller: 'variantsController',
         templateUrl: '/static/partials/variants.html'
