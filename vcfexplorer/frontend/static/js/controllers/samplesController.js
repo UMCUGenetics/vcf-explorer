@@ -7,6 +7,7 @@ samplesController.$inject = ['samplesService'];
 function samplesController(samplesService) {
   var vm = this;
 
+  // Define columns
   var columnDefs = [
     {headerName: "Name", field: "samples", cellRenderer: function(params) {
       return '<a href="/#/samples/'+params.data.samples+'">'+params.data.samples+'</a>';
@@ -15,6 +16,7 @@ function samplesController(samplesService) {
     {headerName: "Date", field: "upload_date"}
   ];
 
+  // Setup grid
   vm.gridOptions = {
     columnDefs: columnDefs,
     rowData: null,
@@ -22,6 +24,7 @@ function samplesController(samplesService) {
     ready: function(){ activate(); }
   };
 
+  // Get Samples functions
   function activate() {
     return getSamples().then(function() {
       console.log('Activated Samples View');

@@ -7,7 +7,7 @@ runController.$inject = ['runService', '$routeParams'];
 function runController(runService, $routeParams) {
   var vm = this;
 
-  // Get runName from arguments and get run metadata
+  // Get runName from arguments
   vm.runName = $routeParams.runName
   vm.run = {};
 
@@ -69,6 +69,7 @@ function runController(runService, $routeParams) {
       vm.gridOptions.api.sizeColumnsToFit();
     });
   }
+
   // Valuegetter for sample genotype per variant.
   function getVariant(params) {
     for (index=0, len=params.data.samples.length; index < len; ++index){

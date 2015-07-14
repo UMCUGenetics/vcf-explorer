@@ -7,7 +7,7 @@ sampleController.$inject = ['sampleService', '$routeParams'];
 function sampleController(sampleService, $routeParams) {
   var vm = this;
 
-  // Get sampleName from arguments and get sample metadata
+  // Get sampleName from arguments
   vm.sampleName = $routeParams.sampleName
   vm.sample = {};
 

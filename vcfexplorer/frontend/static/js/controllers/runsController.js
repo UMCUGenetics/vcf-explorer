@@ -7,6 +7,7 @@ runsController.$inject = ['runsService'];
 function runsController(runsService) {
   var vm = this;
 
+  // Define columns
   var columnDefs = [
     {headerName: "Name", field: "name", cellRenderer: function(params) {
       return '<a href="/#/runs/'+params.data.name+'">'+params.data.name+'</a>';
@@ -15,6 +16,7 @@ function runsController(runsService) {
     {headerName: "Samples", field: "samples"}
   ];
 
+  // Setup grid
   vm.gridOptions = {
     columnDefs: columnDefs,
     rowData: null,
@@ -22,6 +24,7 @@ function runsController(runsService) {
     ready: function(){ activate(); }
   };
 
+  // Get Runs functions
   function activate() {
     return getRuns().then(function() {
       console.log('Activated Runs View');
