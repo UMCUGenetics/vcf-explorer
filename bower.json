@@ -15,9 +15,9 @@
     "tests"
   ],
   "dependencies": {
-    "angular-route": "~1.4.1",
-    "angular": "~1.4.1",
+    "angular": "~1.4.3",
+    "angular-route": "~1.4.3",
     "bootstrap": "~3.3.5",
-    "ag-grid": "~1.10.1"
+    "ag-grid": "~1.12.4"
   }
 }
