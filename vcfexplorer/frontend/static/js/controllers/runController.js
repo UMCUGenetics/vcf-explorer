@@ -17,6 +17,9 @@ function runController(runService, $routeParams) {
     {headerName: "Pos", field: "pos", filter: 'number'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
+    {headerName: "Alternative AC", field: "alternative_ac", filter: 'number'},
+    {headerName: "Total AC", field: "total_ac", filter: 'number'},
+    {headerName: "AF", valueGetter: 'getValue("alternative_ac") / getValue("total_ac")', filter: 'number'},
   ];
 
   // Setup grid
@@ -25,6 +28,7 @@ function runController(runService, $routeParams) {
     rowData: null,
     enableSorting: true,
     enableFilter: true,
+    enableCellExpressions: true,
     ready: function(){
       activateRun(vm.runName);
       activateRunVariants(vm.runName);

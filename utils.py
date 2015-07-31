@@ -76,6 +76,8 @@ def upload_vcf(vcf_file):
             variant['ref'] = fields[3]
             variant['alt'] = fields[4]
             var_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
+            total_allele_count = 0
+            alternative_allele_count = 0
             variant_samples = []
 
             for j, sample in enumerate(samples):
@@ -88,9 +90,20 @@ def upload_vcf(vcf_file):
                         sample_var['filter'] = fields[6]
                     variant_samples.append(sample_var)
 
+                    # Count alleles
+                    total_allele_count += 2
+                    if(gt_data[0] == '1/1'):
+                        alternative_allele_count += 2
+                    elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
+                        alternative_allele_count += 1
+
             bulk_variants.find({'_id':var_id}).upsert().update({
                 '$push': {'samples': {'$each': variant_samples}},
-                '$set': variant
+                '$set': variant,
+                '$inc': {
+                    'total_ac': total_allele_count,
+                    'alternative_ac': alternative_allele_count 
+                    }
                 }
             )
             variant_count += 1

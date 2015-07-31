@@ -15,6 +15,9 @@ function variantsController(variantsService) {
     {headerName: "Pos", field: "pos", filter: 'number'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
+    {headerName: "Alternative AC", field: "alternative_ac", filter: 'number'},
+    {headerName: "Total AC", field: "total_ac", filter: 'number'},
+    {headerName: "AF", valueGetter: 'getValue("alternative_ac") / getValue("total_ac")', filter: 'number'},
     {headerName: "Sample Count", field: "samples", valueGetter: 'data.samples.length', filter: 'number'},
   ];
 

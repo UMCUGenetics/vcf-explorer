@@ -50,11 +50,13 @@ class RunVariants(restful.Resource):
             {"$match": {"samples.run": run_name}},
             {"$group": {
                 "_id":"$_id",
-                "samples":{"$push":"$samples"},
-                "chr":{"$first":"$chr"},
-                "pos":{"$first":"$pos"},
-                "ref":{"$first":"$ref"},
-                "alt":{"$first":"$alt"},
+                "samples": {"$push":"$samples"},
+                "chr": {"$first":"$chr"},
+                "pos": {"$first":"$pos"},
+                "ref": {"$first":"$ref"},
+                "alt": {"$first":"$alt"},
+                "total_ac": {"$first":"$total_ac"},
+                "alternative_ac": {"$first":"$alternative_ac"},
                 }
             },
         ]
@@ -107,7 +109,11 @@ class SampleVariants(restful.Resource):
         db = get_mongodb()
 
         db_filter = {'samples.id':sample_id} #'samples.filter': {'$exists': False}}
-        db_projection = {'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1, 'samples': { '$elemMatch': { 'id': sample_id }}}
+        db_projection = {
+            'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1,
+            'total_ac': 1, 'alternative_ac': 1,
+            'samples': { '$elemMatch': {'id':sample_id} }
+        }
 
         sample_variants = db.variants.find(db_filter,db_projection)
 
