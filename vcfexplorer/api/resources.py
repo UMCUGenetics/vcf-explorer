@@ -56,7 +56,7 @@ class RunVariants(restful.Resource):
                 "ref": {"$first":"$ref"},
                 "alt": {"$first":"$alt"},
                 "total_ac": {"$first":"$total_ac"},
-                "alternative_ac": {"$first":"$alternative_ac"},
+                "alt_ac": {"$first":"$alt_ac"},
                 }
             },
         ]
@@ -111,7 +111,7 @@ class SampleVariants(restful.Resource):
         db_filter = {'samples.id':sample_id} #'samples.filter': {'$exists': False}}
         db_projection = {
             'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1,
-            'total_ac': 1, 'alternative_ac': 1,
+            'total_ac': 1, 'alt_ac': 1,
             'samples': { '$elemMatch': {'id':sample_id} }
         }
 
