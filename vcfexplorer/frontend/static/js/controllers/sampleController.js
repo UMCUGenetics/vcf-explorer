@@ -7,6 +7,10 @@ sampleController.$inject = ['sampleService', '$routeParams'];
 function sampleController(sampleService, $routeParams) {
   var vm = this;
 
+  vm.filterCheckbox = {
+       value : ''
+     };
+
   // Get sampleName from arguments
   vm.sampleName = $routeParams.sampleName
   vm.sample = {};
@@ -33,7 +37,7 @@ function sampleController(sampleService, $routeParams) {
     enableFilter: true,
     ready: function(){
       activateSample(vm.sampleName);
-      activateSampleVariants(vm.sampleName);
+      vm.activateSampleVariants(vm.sampleName, vm.filterCheckbox['value']);
     },
   };
 
@@ -53,14 +57,14 @@ function sampleController(sampleService, $routeParams) {
   }
 
   // Get sample variants functions
-  function activateSampleVariants(sampleName) {
-    return getSampleVariants(sampleName).then(function() {
+   vm.activateSampleVariants = function(sampleName, filtered_vars) {
+    return getSampleVariants(sampleName, filtered_vars).then(function() {
       console.log('Activated SampleVariants View');
     });
   }
 
-  function getSampleVariants(sampleName) {
-    return sampleService.getSampleVariants(sampleName)
+  function getSampleVariants(sampleName, filtered_vars) {
+    return sampleService.getSampleVariants(sampleName, filtered_vars)
     .then(function(data) {
       vm.gridOptions.rowData = data;
       vm.gridOptions.api.onNewRows();

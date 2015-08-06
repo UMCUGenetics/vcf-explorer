@@ -4,12 +4,12 @@
     VCF Explorer api resources
 """
 
-from flask.ext import restful
+from flask.ext.restful import Api, Resource, abort, reqparse
 import pymongo
 
 from ..helpers import get_mongodb
 
-class Runs(restful.Resource):
+class Runs(Resource):
     def get(self):
         """
         Return all vcf datasets
@@ -21,9 +21,9 @@ class Runs(restful.Resource):
         if runs.count():
             return runs
         else:
-            restful.abort(404)
+            abort(404)
 
-class Run(restful.Resource):
+class Run(Resource):
     def get(self, run_name):
         """
         Return run metadata from runs collection
@@ -35,9 +35,9 @@ class Run(restful.Resource):
         if run:
             return run
         else:
-            restful.abort(404)
+            abort(404)
 
-class RunVariants(restful.Resource):
+class RunVariants(Resource):
     def get(self, run_name):
         """
         Return all variants from a run
@@ -65,9 +65,9 @@ class RunVariants(restful.Resource):
         if run_variants.alive:
             return run_variants
         else:
-            restful.abort(404)
+            abort(404)
 
-class Samples(restful.Resource):
+class Samples(Resource):
     def get(self):
         """
         Return all samples
@@ -88,9 +88,9 @@ class Samples(restful.Resource):
         if samples.alive:
             return samples
         else:
-            restful.abort(404)
+            abort(404)
 
-class Sample(restful.Resource):
+class Sample(Resource):
     def get(self, sample_id):
         """
         Return sample metadata from run collection?
@@ -101,28 +101,37 @@ class Sample(restful.Resource):
 
         return {'sample':sample_id} #placeholder
 
-class SampleVariants(restful.Resource):
+class SampleVariants(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('filtered_vars', type = bool, default = False)
+        super(SampleVariants, self).__init__()
+
     def get(self, sample_id):
         """
         Return all variants from a sample
         """
+        args = self.reqparse.parse_args()
         db = get_mongodb()
 
-        db_filter = {'samples.id':sample_id} #'samples.filter': {'$exists': False}}
+        db_filter = {'samples.id':sample_id}
+        if not args['filtered_vars']:
+            db_filter['samples.filter'] = {'$exists': False}
+
         db_projection = {
             'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1,
             'total_ac': 1, 'alt_ac': 1,
             'samples': { '$elemMatch': {'id':sample_id} }
         }
 
-        sample_variants = db.variants.find(db_filter,db_projection)
+        sample_variants = db.variants.find(db_filter, db_projection)
 
         if sample_variants.count():
             return sample_variants
         else:
-            restful.abort(404)
+            abort(404)
 
-class Variants(restful.Resource):
+class Variants(Resource):
     def get(self):
         """
         Return all variants
@@ -134,9 +143,9 @@ class Variants(restful.Resource):
         if variants.count():
             return variants
         else:
-            restful.abort(404)
+            abort(404)
 
-class Variant(restful.Resource):
+class Variant(Resource):
     def get(self, variant_id):
         """
         Return a variant
@@ -148,9 +157,9 @@ class Variant(restful.Resource):
         if variant:
             return variant
         else:
-            restful.abort(404)
+            abort(404)
 
-class Root(restful.Resource):
+class Root(Resource):
     def get(self):
         """
         Return basic database information

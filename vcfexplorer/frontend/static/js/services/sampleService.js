@@ -10,8 +10,15 @@ function sampleService($http, sampleName){
     getSample: getSample
   };
 
-  function getSampleVariants(sampleName) {
-    return $http.get('/api/samples/'+sampleName+'/variants/')
+  function getSampleVariants(sampleName, filtered_vars) {
+    var req = {
+      method: 'GET',
+      url: '/api/samples/'+sampleName+'/variants/',
+      params: {'filtered_vars':filtered_vars},
+    };
+
+
+    return $http(req)
       .then(getSampleVariantsComplete)
       .catch(getSampleVariantsFailed);
 
