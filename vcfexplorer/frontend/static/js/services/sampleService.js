@@ -17,7 +17,6 @@ function sampleService($http, sampleName){
       params: {'filtered_vars':filtered_vars},
     };
 
-
     return $http(req)
       .then(getSampleVariantsComplete)
       .catch(getSampleVariantsFailed);

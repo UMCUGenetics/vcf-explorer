@@ -38,16 +38,33 @@ class Run(Resource):
             abort(404)
 
 class RunVariants(Resource):
+    def __init__(self):
+        """
+        Setup argument parsing
+        """
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('filtered_vars', type = bool, default = False)
+        super(RunVariants, self).__init__()
+
     def get(self, run_name):
         """
         Return all variants from a run
         """
+        args = self.reqparse.parse_args()
         db = get_mongodb()
 
         pipeline = [
             {"$match": {"samples.run": run_name}},
             {"$unwind": "$samples"},
             {"$match": {"samples.run": run_name}},
+        ]
+
+        if not args['filtered_vars']:
+            pipeline.extend([
+                {"$match": {"samples.filter": {"$exists": False}}}
+            ])
+
+        pipeline.extend([
             {"$group": {
                 "_id":"$_id",
                 "samples": {"$push":"$samples"},
@@ -55,11 +72,13 @@ class RunVariants(Resource):
                 "pos": {"$first":"$pos"},
                 "ref": {"$first":"$ref"},
                 "alt": {"$first":"$alt"},
+                "filter": {"$first":"$samples.filter"},
                 "total_ac": {"$first":"$total_ac"},
                 "alt_ac": {"$first":"$alt_ac"},
                 }
-            },
-        ]
+            }
+        ])
+
         run_variants = db.variants.aggregate(pipeline)
 
         if run_variants.alive:
@@ -103,6 +122,9 @@ class Sample(Resource):
 
 class SampleVariants(Resource):
     def __init__(self):
+        """
+        Setup argument parsing
+        """
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('filtered_vars', type = bool, default = False)
         super(SampleVariants, self).__init__()

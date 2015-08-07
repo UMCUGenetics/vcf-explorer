@@ -10,8 +10,14 @@ function runService($http, runName){
     getRun: getRun
   };
 
-  function getRunVariants(runName) {
-    return $http.get('/api/runs/'+runName+'/variants/')
+  function getRunVariants(runName, filtered_vars) {
+    var req = {
+      method: 'GET',
+      url: '/api/runs/'+runName+'/variants/',
+      params: {'filtered_vars':filtered_vars},
+    };
+
+    return $http(req)
       .then(getRunVariantsComplete)
       .catch(getRunVariantsFailed);
 
@@ -23,7 +29,7 @@ function runService($http, runName){
       console.log('Failed getRunVariants.' + error.data)
     }
   }
-  
+
   function getRun(runName) {
     return $http.get('/api/runs/'+runName)
       .then(getRunComplete)

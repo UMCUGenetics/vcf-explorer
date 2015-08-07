@@ -7,13 +7,14 @@ sampleController.$inject = ['sampleService', '$routeParams'];
 function sampleController(sampleService, $routeParams) {
   var vm = this;
 
-  vm.filterCheckbox = {
-       value : ''
-     };
-
   // Get sampleName from arguments
   vm.sampleName = $routeParams.sampleName
   vm.sample = {};
+
+  // Filtered variants checkbox
+  vm.filterCheckbox = {
+    value : ''
+  };
 
   // Define columns
   var columnDefs = [
@@ -57,6 +58,7 @@ function sampleController(sampleService, $routeParams) {
   }
 
   // Get sample variants functions
+  // Available in $scope 
    vm.activateSampleVariants = function(sampleName, filtered_vars) {
     return getSampleVariants(sampleName, filtered_vars).then(function() {
       console.log('Activated SampleVariants View');

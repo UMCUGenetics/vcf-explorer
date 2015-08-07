@@ -11,12 +11,18 @@ function runController(runService, $routeParams) {
   vm.runName = $routeParams.runName
   vm.run = {};
 
+  // Filtered variants checkbox
+  vm.filterCheckbox = {
+    value : ''
+  };
+
   // Define columns
   var columnDefs = [
     {headerName: "Chr", field: "chr"},
     {headerName: "Pos", field: "pos", filter: 'number'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
+    {headerName: "Filter", field: "filter"},
     {headerName: "Alt AC", field: "alt_ac", filter: 'number'},
     {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', filter: 'number'},
   ];
@@ -30,7 +36,7 @@ function runController(runService, $routeParams) {
     enableCellExpressions: true,
     ready: function(){
       activateRun(vm.runName);
-      activateRunVariants(vm.runName);
+      vm.activateRunVariants(vm.runName, vm.filterCheckbox['value']);
     },
   };
 
@@ -58,14 +64,15 @@ function runController(runService, $routeParams) {
   }
 
   // Get run variants functions
-  function activateRunVariants(runName) {
-    return getRunVariants(runName).then(function() {
+  // Available in $scope 
+  vm.activateRunVariants = function(runName, filtered_vars) {
+    return getRunVariants(runName, filtered_vars).then(function() {
       console.log('Activated RunVariants View');
     });
   }
 
-  function getRunVariants(runName) {
-    return runService.getRunVariants(runName)
+  function getRunVariants(runName, filtered_vars) {
+    return runService.getRunVariants(runName, filtered_vars)
     .then(function(data) {
       vm.gridOptions.rowData = data;
       vm.gridOptions.api.onNewRows();
