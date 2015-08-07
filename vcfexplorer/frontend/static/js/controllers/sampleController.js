@@ -58,7 +58,7 @@ function sampleController(sampleService, $routeParams) {
   }
 
   // Get sample variants functions
-  // Available in $scope 
+  // Available in $scope
    vm.activateSampleVariants = function(sampleName, filtered_vars) {
     return getSampleVariants(sampleName, filtered_vars).then(function() {
       console.log('Activated SampleVariants View');

@@ -77,7 +77,9 @@ def upload_vcf(vcf_file):
             variant['alt'] = fields[4]
             var_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
             total_allele_count = 0
+            raw_total_allele_count = 0
             alt_allele_count = 0
+            raw_alt_allele_count = 0
             variant_samples = []
 
             for j, sample in enumerate(samples):
@@ -86,23 +88,36 @@ def upload_vcf(vcf_file):
                     sample_var = dict(zip(gt_format, gt_data))
                     sample_var['id'] = sample
                     sample_var['run'] = run_name
-                    if fields[6] != "PASS":
-                        sample_var['filter'] = fields[6]
-                    variant_samples.append(sample_var)
 
-                    # Count alleles
-                    total_allele_count += 2
-                    if(gt_data[0] == '1/1'):
-                        alt_allele_count += 2
-                    elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
-                        alt_allele_count += 1
+                    if fields[6] == "PASS" or fields[6] ==".":
+                        # Count alleles passed variants
+                        total_allele_count += 2
+                        raw_total_allele_count += 2
+                        if(gt_data[0] == '1/1'):
+                            alt_allele_count += 2
+                            raw_alt_allele_count += 2
+                        elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
+                            alt_allele_count += 1
+                            raw_alt_allele_count += 1
+
+                    else: #Variant is filtered
+                        sample_var['filter'] = fields[6]
+                        # Count alleles filtered variants
+                        raw_total_allele_count += 2
+                        if(gt_data[0] == '1/1'):
+                            raw_alt_allele_count += 2
+                        elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
+                            raw_alt_allele_count += 1
+                    variant_samples.append(sample_var)
 
             bulk_variants.find({'_id':var_id}).upsert().update({
                 '$push': {'samples': {'$each': variant_samples}},
                 '$set': variant,
                 '$inc': {
                     'total_ac': total_allele_count,
-                    'alt_ac': alt_allele_count
+                    'alt_ac': alt_allele_count,
+                    'raw_total_ac': raw_total_allele_count,
+                    'raw_alt_ac': raw_alt_allele_count
                     }
                 }
             )
