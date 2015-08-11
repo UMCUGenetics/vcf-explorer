@@ -18,8 +18,8 @@ function sampleController(sampleService, $routeParams) {
 
   // Define columns
   var columnDefs = [
-    {headerName: "Chr", field: "chr"},
-    {headerName: "Pos", field: "pos", filter: 'number'},
+    {headerName: "Chr", field: "chr", sort: 'asc'},
+    {headerName: "Pos", field: "pos", filter: 'number', sort: 'asc'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
     {headerName: "Alt AC", field: "alt_ac", filter: 'number'},

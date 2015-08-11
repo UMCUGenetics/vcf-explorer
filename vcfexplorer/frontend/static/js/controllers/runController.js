@@ -18,8 +18,8 @@ function runController(runService, $routeParams) {
 
   // Define columns
   var columnDefs = [
-    {headerName: "Chr", field: "chr"},
-    {headerName: "Pos", field: "pos", filter: 'number'},
+    {headerName: "Chr", field: "chr", sort: 'asc'},
+    {headerName: "Pos", field: "pos", filter: 'number', sort: 'asc'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
     {headerName: "Filter", field: "filter"},
@@ -64,7 +64,7 @@ function runController(runService, $routeParams) {
   }
 
   // Get run variants functions
-  // Available in $scope 
+  // Available in $scope
   vm.activateRunVariants = function(runName, filtered_vars) {
     return getRunVariants(runName, filtered_vars).then(function() {
       console.log('Activated RunVariants View');
