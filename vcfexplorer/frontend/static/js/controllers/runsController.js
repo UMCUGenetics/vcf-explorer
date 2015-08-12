@@ -10,7 +10,7 @@ function runsController(runsService, utilityService) {
   // Define columns
   var columnDefs = [
     {headerName: "Name", field: "name", cellRenderer: function(params) {
-      return '<a href="/#/runs/'+params.data.name+'">'+params.data.name+'</a>';
+      return '<a href="/#/runs/'+params.value+'">'+params.value+'</a>';
     }},
     {headerName: "VCF", field: "vcf_file"},
     {headerName: "Samples", field: "samples"},
