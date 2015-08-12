@@ -17,7 +17,7 @@ function variantsController(variantsService) {
     {headerName: "Alt", field: "alt"},
     {headerName: "Alt AC", field: "alt_ac", filter: 'number'},
     {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', filter: 'number'},
-    {headerName: "Sample Count", field: "samples", valueGetter: 'data.samples.length', filter: 'number'},
+    {headerName: "# Samples", field: "samples", valueGetter: 'data.alt_ac / 2', filter: 'number'},
   ];
 
   // Setup grid

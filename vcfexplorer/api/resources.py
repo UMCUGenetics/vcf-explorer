@@ -160,7 +160,14 @@ class Variants(Resource):
         Todo: Implement pagination?
         """
         db = get_mongodb()
-        variants = db.variants.find()
+
+        db_projection = {
+            '_id': 1,
+            'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1,
+            'total_ac': 1, 'alt_ac': 1,
+        }
+
+        variants = db.variants.find(projection=db_projection)
 
         if variants.count():
             return variants
