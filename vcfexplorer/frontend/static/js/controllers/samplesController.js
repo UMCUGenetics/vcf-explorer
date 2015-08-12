@@ -2,18 +2,18 @@ angular
   .module('vcfExplorerApp')
   .controller('samplesController', samplesController);
 
-samplesController.$inject = ['samplesService'];
+samplesController.$inject = ['samplesService','utilityService'];
 
-function samplesController(samplesService) {
+function samplesController(samplesService, utilityService) {
   var vm = this;
 
   // Define columns
   var columnDefs = [
     {headerName: "Name", field: "samples", cellRenderer: function(params) {
-      return '<a href="/#/samples/'+params.data.samples+'">'+params.data.samples+'</a>';
+      return '<a href="/#/samples/'+params.value+'">'+params.value+'</a>';
     }},
     {headerName: "VCF", field: "vcf_file"},
-    {headerName: "Date", field: "upload_date"}
+    {headerName: "Date", field: "upload_date", valueGetter: utilityService.getUploadDate}
   ];
 
   // Setup grid

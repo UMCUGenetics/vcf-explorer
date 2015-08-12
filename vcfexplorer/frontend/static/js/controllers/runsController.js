@@ -2,9 +2,9 @@ angular
   .module('vcfExplorerApp')
   .controller('runsController', runsController);
 
-runsController.$inject = ['runsService'];
+runsController.$inject = ['runsService','utilityService'];
 
-function runsController(runsService) {
+function runsController(runsService, utilityService) {
   var vm = this;
 
   // Define columns
@@ -13,14 +13,14 @@ function runsController(runsService) {
       return '<a href="/#/runs/'+params.data.name+'">'+params.data.name+'</a>';
     }},
     {headerName: "VCF", field: "vcf_file"},
-    {headerName: "Samples", field: "samples"}
+    {headerName: "Samples", field: "samples"},
+    {headerName: "Date", field: "upload_date", valueGetter: utilityService.getUploadDate}
   ];
 
   // Setup grid
   vm.gridOptions = {
     columnDefs: columnDefs,
     rowData: null,
-    angularCompileRows: false,
     ready: function(){ activate(); }
   };
 
