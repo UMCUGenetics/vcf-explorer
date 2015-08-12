@@ -4,7 +4,7 @@ angular
 
 sampleService.$inject = ['$http'];
 
-function sampleService($http, sampleName){
+function sampleService($http){
   return {
     getSampleVariants: getSampleVariants,
     getSample: getSample

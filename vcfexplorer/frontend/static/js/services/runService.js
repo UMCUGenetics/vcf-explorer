@@ -4,7 +4,7 @@ angular
 
 runService.$inject = ['$http'];
 
-function runService($http, runName){
+function runService($http){
   return {
     getRunVariants: getRunVariants,
     getRun: getRun
