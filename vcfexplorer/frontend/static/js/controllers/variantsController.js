@@ -15,9 +15,9 @@ function variantsController(variantsService) {
     {headerName: "Pos", field: "pos", filter: 'number'},
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
-    {headerName: "Alt AC", field: "alt_ac", filter: 'number'},
-    {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', filter: 'number'},
-    {headerName: "# Samples", field: "samples", valueGetter: 'data.alt_ac / 2', filter: 'number'},
+    {headerName: "Alt AC", field: "alt_ac", headerTooltip: "Filtered alternative allele count", filter: 'number'},
+    {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', headerTooltip: "Filtered alternative allele frequency", filter: 'number'},
+    {headerName: "# Samples", field: "samples", headerTooltip: "Filtered sample count", valueGetter: 'data.alt_ac / 2', filter: 'number'},
   ];
 
   // Setup grid

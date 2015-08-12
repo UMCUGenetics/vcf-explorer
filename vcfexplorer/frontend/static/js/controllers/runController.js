@@ -23,8 +23,8 @@ function runController(runService, $routeParams) {
     {headerName: "Ref", field: "ref"},
     {headerName: "Alt", field: "alt"},
     {headerName: "Filter", field: "filter"},
-    {headerName: "Alt AC", field: "alt_ac", filter: 'number'},
-    {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', filter: 'number'},
+    {headerName: "Alt AC", field: "alt_ac", headerTooltip: "Filtered alternative allele count", filter: 'number'},
+    {headerName: "Alt AF", valueGetter: 'data.alt_ac / data.total_ac', headerTooltip: "Filtered alternative allele frequency", filter: 'number'},
   ];
 
   // Setup grid
