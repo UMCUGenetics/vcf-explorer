@@ -27,6 +27,7 @@ function sampleController(sampleService, $routeParams) {
     {headerName: "GT", field: "gt", valueGetter: 'data.samples[0].GT'},
     {headerName: "GQ", field: "gq", valueGetter: 'data.samples[0].GQ'},
     {headerName: "DP", field: "dp", valueGetter: 'data.samples[0].DP'},
+    {headerName: "AD", field: "ad", valueGetter: 'data.samples[0].AD'},
     {headerName: "Filter", field: "filter", valueGetter: 'data.samples[0].filter'},
   ];
 
