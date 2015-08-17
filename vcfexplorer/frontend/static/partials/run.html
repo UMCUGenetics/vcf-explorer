@@ -4,7 +4,7 @@
     <dt>Samples</dt><dd>{{run.run.samples}}</dd>
     <dt>VCF</dt><dd>{{run.run.vcf_file}}</dd>
     <dt>GATK</dt><dd>{{run.run.gatk}}</dd>
-</dl>
+  </dl>
   <form name="filterForm">
   <label>Include filtered variants:
     <input type="checkbox" ng-model="run.filterCheckbox.value" ng-true-value=true ng-false-value="" ng-change="run.activateRunVariants(run.run.name, run.filterCheckbox.value)">

@@ -13,7 +13,6 @@ class Runs(Resource):
     def get(self):
         """
         Return all vcf datasets
-        Todo: Implement pagination?
         """
         db = get_mongodb()
         runs = db.runs.find()
@@ -90,7 +89,6 @@ class Samples(Resource):
     def get(self):
         """
         Return all samples
-        Todo: Implement pagination?
         """
         db = get_mongodb()
 
@@ -113,12 +111,15 @@ class Sample(Resource):
     def get(self, sample_id):
         """
         Return sample metadata from run collection?
-        Todo: Add metadata from samples to run collection.
         """
 
         db = get_mongodb()
+        run = db.runs.find_one({'samples':sample_id})
 
-        return {'sample':sample_id} #placeholder
+        if run:
+            return {'sample':sample_id, 'run': run}
+        else:
+            abort(404)
 
 class SampleVariants(Resource):
     def __init__(self):
@@ -157,7 +158,6 @@ class Variants(Resource):
     def get(self):
         """
         Return all variants
-        Todo: Implement pagination?
         """
         db = get_mongodb()
 
