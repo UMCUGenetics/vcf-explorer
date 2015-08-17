@@ -181,7 +181,15 @@ class Variant(Resource):
         """
         db = get_mongodb()
 
-        variant = db.variants.find_one({'_id':variant_id})
+        db_projection = {
+            '_id': 1,
+            'chr': 1, 'pos': 1, 'ref': 1, 'alt': 1,
+            'total_ac': 1, 'alt_ac': 1,
+            'raw_total_ac':1, 'raw_alt_ac': 1,
+            'dbSNP': 1,
+        }
+
+        variant = db.variants.find_one({'_id':variant_id}, db_projection)
 
         if variant:
             return variant

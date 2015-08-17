@@ -30,6 +30,10 @@ angular
         controller: 'variantsController',
         templateUrl: '/static/partials/variants.html'
       })
+      .when('/variants/:variantID', {
+        controller: 'variantController',
+        templateUrl: '/static/partials/variant.html'
+      })
       .otherwise({
         redirectTo: '/'
       });

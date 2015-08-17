@@ -10,7 +10,9 @@ function variantsController(variantsService) {
 
   // Define columns
   var columnDefs = [
-    {headerName: "ID", field: "_id", filter: 'text', sort: 'asc'},
+    {headerName: "ID", field: "_id", filter: 'text', sort: 'asc', cellRenderer: function(params){
+      return '<a href="/#/variants/'+params.value+'">'+params.value+'</a>';
+    }},
     {headerName: "Chr", field: "chr"},
     {headerName: "Pos", field: "pos", filter: 'number'},
     {headerName: "Ref", field: "ref"},
