@@ -129,7 +129,7 @@ def upload_vcf(vcf_file):
                 }
             )
             variant_count += 1
-            if variant_count == 50000: #Upload variants in bulk -> benchmark?!
+            if variant_count == 10000: #Upload variants in bulk -> benchmark?!
                 bulk_variants.execute()
                 bulk_variants = variants.initialize_unordered_bulk_op()
                 variant_count = 0

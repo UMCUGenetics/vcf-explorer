@@ -78,7 +78,7 @@ class RunVariants(Resource):
             }
         ])
 
-        run_variants = db.variants.aggregate(pipeline)
+        run_variants = db.variants.aggregate(pipeline, allowDiskUse=True)
 
         if run_variants.alive:
             return run_variants
