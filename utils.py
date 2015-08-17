@@ -82,6 +82,13 @@ def upload_vcf(vcf_file):
             raw_alt_allele_count = 0
             variant_samples = []
 
+            ## Parse external database id's
+            external_ids = fields[2].split(',')
+            for external_id in external_ids:
+                if external_id.startswith('rs'):
+                    variant['dbSNP'] = external_id
+
+            ## Parse samples
             for j, sample in enumerate(samples):
                 gt_data = fields[9+j].split(':')
                 if(gt_data[0] != './.'):
