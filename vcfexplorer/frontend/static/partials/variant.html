@@ -2,7 +2,7 @@
     <h1>{{variant.variant.chr}}:{{variant.variant.pos}} {{variant.variant.ref}}/{{variant.variant.alt}}</h1>
     <hr>
     <dl class="dl-horizontal">
-      <dt>dbSNP</dt><dd><a href="#">{{variant.variant.dbSNP}}</a></dd>
+      <dt>dbSNP</dt><dd><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{variant.variant.dbSNP}}">{{variant.variant.dbSNP}}</a></dd>
       <dt>Allele Frequency</dt><dd>{{variant.variant.alt_ac / variant.variant.total_ac}}</dd>
       <dt>Allele Count</dt><dd>{{variant.variant.alt_ac}} / {{variant.variant.total_ac}}</dd>
     </dl>

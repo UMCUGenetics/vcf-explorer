@@ -1,10 +1,12 @@
 <div ng-controller="sampleController as sample">
   <h1>{{sample.sample.sample}}</h1>
+  <hr>
   <dl class="dl-horizontal">
     <dt>Run</dt><dd><a href="/#/runs/{{sample.sample.run.name}}">{{sample.sample.run.name}}</a></dd>
     <dt>VCF</dt><dd>{{sample.sample.run.vcf_file}}</dd>
     <dt>GATK</dt><dd>{{sample.sample.run.gatk}}</dd>
   </dl>
+  <hr>
   <form name="filterForm">
   <label>Include filtered variants:
     <input type="checkbox" ng-model="sample.filterCheckbox.value" ng-true-value=true ng-false-value="" ng-change="sample.activateSampleVariants(sample.sample.sample, sample.filterCheckbox.value)">
