@@ -28,7 +28,7 @@ cd vcf-explorer
 virtualenv env
 . env/bin/activate
 
-pip install https://github.com/mongodb/mongo-python-driver/archive/3.0.1.tar.gz
+pip install https://github.com/mongodb/mongo-python-driver/archive/3.2.tar.gz
 pip install -r requirements.txt
 ```
 
