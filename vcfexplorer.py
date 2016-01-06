@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 """
-    manage.py
+    vcfexplorer.py
 
     VCF Explorer management application.
-    Todo: Use flask extension -> see feedly?
 """
 
 import argparse
@@ -18,7 +17,7 @@ def runserver(args):
 def loadvcf(args):
     utils.upload_vcf(args.vcf_file)
 
-def reset(args):
+def resetdb(args):
     utils.resetdb()
 
 def create_indexes(args):
@@ -43,7 +42,7 @@ if __name__ == "__main__":
 
     sp_runserver.set_defaults(func=runserver)
     sp_vcf.set_defaults(func=loadvcf)
-    sp_resetdb.set_defaults(func=reset)
+    sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
 
     args = parser.parse_args()
