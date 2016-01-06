@@ -15,13 +15,13 @@ def runserver(args):
     app.run(host=args.hostname, port=args.port)
 
 def loadvcf(args):
-    utils.upload_vcf(args.vcf_file)
+    utils.vcf.upload_vcf(args.vcf_file)
 
 def resetdb(args):
-    utils.resetdb()
+    utils.db.resetdb()
 
 def create_indexes(args):
-    utils.create_indexes()
+    utils.db.create_indexes()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -1,19 +1,13 @@
 """
-    utils.py
+    vcf.py
 
-    Utility functions used in manage.py
+    Utility functions to upload vcf files
 """
-
 import re
 from datetime import datetime
 import sys
 
-import pymongo
-
-connection = pymongo.MongoClient("mongodb://localhost")
-
-### Metadata regular expressions
-filter_re = re.compile('(?:##FILTER=<ID=)(\w+)(?:,Description=")(.+)(?:">)')
+from . import connection
 
 def upload_vcf(vcf_file):
     """
@@ -21,6 +15,9 @@ def upload_vcf(vcf_file):
 
     Todo: Parse sample metadata available in vcf?
     """
+
+    filter_re = re.compile('(?:##FILTER=<ID=)(\w+)(?:,Description=")(.+)(?:">)')
+
     db = connection.vcf_explorer
     variants = db.variants
     runs = db.runs
@@ -149,28 +146,3 @@ def upload_vcf(vcf_file):
         }
     }
     runs.insert_one(run)
-
-def create_indexes():
-    """
-    Create mongodb indexes.
-
-    Todo: Move or copy to vcfexplorer flask app? On start of webapp -> make sure indexes are created.
-    """
-    db = connection.vcf_explorer
-    variants = db.variants
-    runs = db.runs
-    runs.drop_indexes()
-    runs.create_index("name")
-    runs.create_index("samples")
-
-    variants.drop_indexes()
-    variants.create_index("samples.id")
-    variants.create_index("samples.run")
-    variants.create_index([("samples.id", pymongo.ASCENDING),("samples.filter", pymongo.ASCENDING)], sparse=True)
-
-def resetdb():
-    """
-    Drop database and recreate indexes.
-    """
-    connection.drop_database('vcf_explorer')
-    create_indexes()
