@@ -15,7 +15,7 @@ class Runs(Resource):
         Return all vcf datasets
         """
         db = get_mongodb()
-        runs = db.runs.find()
+        runs = db.vcfs.find()
 
         if runs.count():
             return runs
@@ -29,7 +29,7 @@ class Run(Resource):
         """
         db = get_mongodb()
 
-        run = db.runs.find_one({'name':run_name})
+        run = db.vcfs.find_one({'name':run_name})
 
         if run:
             return run
@@ -100,7 +100,7 @@ class Samples(Resource):
                 "vcf_file": 1,
                 "upload_date": 1 }
         }]
-        samples = db.runs.aggregate(pipeline)
+        samples = db.vcfs.aggregate(pipeline)
 
         if samples.alive:
             return samples
@@ -114,7 +114,7 @@ class Sample(Resource):
         """
 
         db = get_mongodb()
-        run = db.runs.find_one({'samples':sample_id})
+        run = db.vcfs.find_one({'samples':sample_id})
 
         if run:
             return {'sample':sample_id, 'run': run}

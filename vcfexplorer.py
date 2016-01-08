@@ -18,10 +18,10 @@ def loadvcf(args):
     utils.vcf.upload_vcf(args.vcf_file, args.vcf_type)
 
 def resetdb(args):
-    utils.db.resetdb()
+    utils.database.resetdb()
 
 def create_indexes(args):
-    utils.db.create_indexes()
+    utils.database.create_indexes()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
