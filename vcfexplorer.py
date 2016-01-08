@@ -15,7 +15,7 @@ def runserver(args):
     app.run(host=args.hostname, port=args.port)
 
 def loadvcf(args):
-    utils.vcf.upload_vcf(args.vcf_file)
+    utils.vcf.upload_vcf(args.vcf_file, args.vcf_type)
 
 def resetdb(args):
     utils.db.resetdb()
@@ -26,9 +26,13 @@ def create_indexes(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    # VCF file arguments
     vcf_file = argparse.ArgumentParser(add_help=False)
+    vcf_file.add_argument('vcf_type', help='VCF type', choices=['gatk', 'delly'])
     vcf_file.add_argument('vcf_file', help='path/to/file.vcf')
 
+
+    # Server arguments
     server_port = argparse.ArgumentParser(add_help=False)
     server_port.add_argument('-p','--port', default=5000, type=int, help='The port of the webserver.')
     server_host =argparse.ArgumentParser(add_help=False)
