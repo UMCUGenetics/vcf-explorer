@@ -256,12 +256,11 @@ def delly_line(line, vcf, samples):
     for j, sample in enumerate(samples):
         gt_data = fields[9+j].split(':')
         if (gt_data[0] != './.' and gt_data[0] != '0/0'):
-        #if (gt_data[0] != './.'):
-        sample_var = {}
-        sample_var['NAME'] = sample
-        sample_var['FILTER'] = fields[6]
-        sample_var['FORMAT'] = dict(zip(gt_format, gt_data))
-        sample_var['INFO'] = sample_info
+            sample_var = {}
+            sample_var['NAME'] = sample
+            sample_var['FILTER'] = fields[6]
+            sample_var['FORMAT'] = dict(zip(gt_format, gt_data))
+            sample_var['INFO'] = sample_info
 
         for id in sample_var['FORMAT']:
             if search_header(id, vcf['HEADER']['FORMAT'])[0]['TYPE'] == "Integer" and re.match("^-*\d+$",str(sample_var['FORMAT'][id])):
