@@ -8,6 +8,7 @@ from datetime import datetime
 import sys
 
 import pymongo
+import bson
 
 from . import connection, db
 from helper import deep_update
@@ -19,58 +20,57 @@ def upload_vcf(vcf_file, vcf_type):
     """
     variant_count = 0
     bulk_variants = db.variants.initialize_unordered_bulk_op()
-    run_name = vcf_file.split('/')[-1].replace(".vcf","")
+    vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
 
-    if runs.find({'name':run_name}).limit(1).count() > 0:
-        sys.exit("Error: Duplicate vcf.")
+    if db.vcfs.find({'name':vcf_name}).limit(1).count() > 0:
+        sys.exit("Error: Duplicate vcf name.")
 
     vcf_metadata = {
-        'run': run_name,
-        'vcf': vcf_file
+        '_id': bson.objectid.ObjectId(),
+        'name': vcf_name,
+        'vcf_file': vcf_file,
+        'upload_date' : datetime.now()
     }
+    try:
+        f = open(vcf_file, 'r')
+    except IOError:
+        print "Can't open vcf file: {0}".format(vcf_file)
+    else:
+        with f:
+            for line in f:
+                line = line.strip('\n')
 
-    with open(vcf_file, 'r') as f:
-        for line in f:
-            line = line.strip('\n')
+                if line.startswith('#'):
+                    if vcf_type == 'gatk':
+                        header_line_metadata = gatk_header(line)
+                        deep_update(vcf_metadata, header_line_metadata)
+                    elif vcf_type == 'delly':
+                        header_line_metadata = delly_header(line)
+                        deep_update(vcf_metadata, header_line_metadata)
 
-            if line.startswith('#'):
-                if vcf_type == 'gatk':
-                    header_line_metadata = gatk_header(line)
-                    deep_update(vcf_metadata, header_line_metadata)
-                elif vcf_type == 'delly':
-                    header_line_metadata = delly_header(line)
-                    deep_update(vcf_metadata, header_line_metadata)
+                else:
+                    if vcf_type == 'gatk':
+                        variant, variant_samples = gatk_line(line, vcf_metadata)
+                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
 
-            else:
-                if vcf_type == 'gatk':
-                    variant, variant_samples = gatk_line(line, vcf_metadata)
-                    variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
+                    elif vcf_type == 'delly':
+                        variant, variant_samples = delly_line(line, vcf_metadata)
+                        #variant_id
 
-                elif vcf_type == 'delly':
-                    variant, variant_samples = delly_line(line, vcf_metadata)
-                    #variant_id
-
-                bulk_variants.find({'_id':variant_id}).upsert().update({
-                    '$push': {'samples': {'$each': variant_samples}},
-                    '$set': variant,
-                    }
-                )
-                variant_count += 1
-                if variant_count == 10000:
-                    bulk_variants.execute()
-                    bulk_variants = variants.initialize_unordered_bulk_op()
-                    variant_count = 0
+                    bulk_variants.find({'_id':variant_id}).upsert().update({
+                        '$push': {'samples': {'$each': variant_samples}},
+                        '$set': variant,
+                        }
+                    )
+                    variant_count += 1
+                    if variant_count == 10000:
+                        bulk_variants.execute()
+                        bulk_variants = variants.initialize_unordered_bulk_op()
+                        variant_count = 0
 
         bulk_variants.execute() # insert remaining variants
-
         # Store run/vcf metadata in vcfs collection
-        run = {
-            'name' : run_name,
-            'vcf_file' : vcf_file,
-            'samples' : vcf_metadata['samples'],
-            'upload_date' : datetime.now(),
-        }
-        db.vcfs.insert_one(run)
+        db.vcfs.insert_one(vcf_metadata)
 
 def gatk_header(line):
     """
@@ -118,8 +118,8 @@ def gatk_line(line, vcf_metadata):
         gt_data = fields[9+j].split(':')
         if(gt_data[0] != './.' and gt_data[0] != '0/0'):
             sample_var = dict(zip(gt_format, gt_data))
-            sample_var['id'] = sample
-            sample_var['run'] = vcf_metadata['run']
+            sample_var['sample_name'] = sample
+            sample_var['vcf_id'] = vcf_metadata['_id']
 
             if fields[6] == "PASS" or fields[6] ==".":
                 # Count alleles passed variants
@@ -150,7 +150,9 @@ def delly_header(line):
     """
     line_metadata = {}
     re_match = re.search("##(\w+)=<ID=(\w+),Number=(\w+),Type=(\w+),Description=\"(.+)\">",line)
-    if re_match:
+    if line.startswith('#CHROM'):
+        line_metadata['samples'] = line.split()[9:]
+    elif re_match:
         line_metadata['header'] = {re_match.group(1).upper() : [] }
         line_metadata['header'][re_match.group(1).upper()].append({"id": re_match.group(2), "number": re_match.group(3), "type": re_match.group(4), "description": re_match.group(5)})
     else:
@@ -170,9 +172,8 @@ def delly_line(line, vcf_metadata):
     sample_info_fields = ("precise","ciend","cipos","inslen","pe","mapq","consensus","sr","srq")
 
     fields = line.split('\t')
-
-    gt_format = fields[8].split(':')
-    info_fields = dict(item.split("=") for item in fields[7].split(";")[1:])
+    gt_format = [field.lower() for field in fields[8].split(':')]
+    info_fields = dict(item.lower().split("=") for item in fields[7].split(";")[1:])
     info_fields["precise"] = fields[7].split(";")[0]
 
     #vcf['caller'] = info_fields['svmethod'] -> this should be parsed from header lines if possible.
@@ -181,14 +182,14 @@ def delly_line(line, vcf_metadata):
     sample_info = get_info_fields(sample_info_fields, info_fields)
 
     variant['chr'] = fields[0].upper()
-    variant['chr'] = re.sub("chr","",variant['chr'],flags=re.i)
+    variant['chr'] = re.sub("chr","",variant['chr'],flags=re.I)
     variant['pos'] = int(fields[1])
     variant['id'] = fields[2]
     variant['ref'] = fields[3]
     variant['alt'] = fields[4]
     variant['qual'] = fields[5];
     variant['variant_info'] = variant_info
-    variant['variant_info']['chr2'] = re.sub("chr","",variant['variant_info']['chr2'],flags=re.i)
+    variant['variant_info']['chr2'] = re.sub("chr","",variant['variant_info']['chr2'],flags=re.I)
 
     for id in variant['variant_info']:
         if search_header(id, vcf_metadata['header']['info'])[0]['type'] == "integer" and re.match("^-*\d+$",str(variant['variant_info'][id])):
@@ -202,23 +203,24 @@ def delly_line(line, vcf_metadata):
         gt_data = fields[9+j].split(':')
         if (gt_data[0] != './.' and gt_data[0] != '0/0'):
             sample_var = {}
-            sample_var['name'] = sample
+            sample_var['sample_name'] = sample
+            sample_var['vcf_id'] = vcf_metadata['_id']
             sample_var['filter'] = fields[6]
             sample_var['format'] = dict(zip(gt_format, gt_data))
             sample_var['info'] = sample_info
 
-        for id in sample_var['format']:
-            if search_header(id, vcf_metadata['header']['format'])[0]['type'] == "integer" and re.match("^-*\d+$",str(sample_var['format'][id])):
-                sample_var['format'][id] = int(sample_var['format'][id])
-            if search_header(id, vcf_metadata['header']['format'])[0]['type'] == "float" and re.match("^-*(\d+)\.*(\d*)$",str(sample_var['format'][id])):
-                sample_var['format'][id] = float(sample_var['format'][id])
+            for id in sample_var['format']:
+                if search_header(id, vcf_metadata['header']['format'])[0]['type'] == "integer" and re.match("^-*\d+$",str(sample_var['format'][id])):
+                    sample_var['format'][id] = int(sample_var['format'][id])
+                if search_header(id, vcf_metadata['header']['format'])[0]['type'] == "float" and re.match("^-*(\d+)\.*(\d*)$",str(sample_var['format'][id])):
+                    sample_var['format'][id] = float(sample_var['format'][id])
 
-        for id in sample_var['info']:
-            if search_header(id, vcf_metadata['header']['info'])[0]['type'] == "integer" and re.match("^-*\d+$",str(sample_var['info'][id])):
-                sample_var['info'][id] = int(sample_var['info'][id])
-            if search_header(id, vcf_metadata['header']['info'])[0]['type'] == "float" and re.match("^-*(\d+)\.*(\d*)$",str(sample_var['info'][id])):
-                sample_var['info'][id] = float(sample_var['info'][id])
-        variant_samples.append(sample_var)
+            for id in sample_var['info']:
+                if search_header(id, vcf_metadata['header']['info'])[0]['type'] == "integer" and re.match("^-*\d+$",str(sample_var['info'][id])):
+                    sample_var['info'][id] = int(sample_var['info'][id])
+                if search_header(id, vcf_metadata['header']['info'])[0]['type'] == "float" and re.match("^-*(\d+)\.*(\d*)$",str(sample_var['info'][id])):
+                    sample_var['info'][id] = float(sample_var['info'][id])
+            variant_samples.append(sample_var)
     return variant, variant_samples
 
 def get_info_fields(fields, info_fields):
