@@ -14,6 +14,8 @@ def deep_update(source, overrides):
         if isinstance(value, collections.Mapping) and value:
             returned = deep_update(source.get(key, {}), value)
             source[key] = returned
+        elif isinstance(value, list):
+            source[key] = source.get(key, []) + value
         else:
             source[key] = overrides[key]
     return source
