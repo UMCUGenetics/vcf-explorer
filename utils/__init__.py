@@ -6,3 +6,4 @@ db = connection.vcf_explorer
 
 import database
 import vcf
+import query
