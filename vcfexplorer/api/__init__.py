@@ -9,7 +9,7 @@ from flask.ext import restful
 from bson import json_util
 
 from .resources import Root
-from .resources import Runs, Run, RunVariants
+from .resources import VCFs, VCF, VCFVariants
 from .resources import Samples, Sample, SampleVariants
 from .resources import Variants, Variant
 
@@ -28,13 +28,13 @@ def output_json(data, code, headers=None):
 # Add api resources
 api.add_resource(Root, '/')
 
-api.add_resource(Runs, '/runs/')
-api.add_resource(Run, '/runs/<string:run_name>/')
-api.add_resource(RunVariants, '/runs/<string:run_name>/variants/')
+api.add_resource(VCFs, '/vcf/')
+api.add_resource(VCF, '/vcf/<string:vcf_name>/')
+api.add_resource(VCFVariants, '/vcf/<string:vcf_name>/variants/')
 
-api.add_resource(Samples, '/samples/')
-api.add_resource(Sample, '/samples/<string:sample_id>/')
-api.add_resource(SampleVariants, '/samples/<string:sample_id>/variants/')
+api.add_resource(Samples, '/sample/')
+api.add_resource(Sample, '/sample/<string:sample_name>/')
+api.add_resource(SampleVariants, '/sample/<string:sample_name>/variants/')
 
-api.add_resource(Variants, '/variants/')
-api.add_resource(Variant, '/variants/<string:variant_id>/')
+api.add_resource(Variants, '/variant/')
+api.add_resource(Variant, '/variant/<string:variant_id>/')
