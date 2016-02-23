@@ -197,7 +197,8 @@ def delly_line(line, vcf_metadata):
             sample_var = {}
             sample_var['sample'] = sample
             sample_var['vcf_id'] = vcf_metadata['_id']
-            sample_var['filter'] = fields[6]
+            if fields[6] != "PASS" and fields[6] !=".":
+                sample_var['filter'] = fields[6]
             sample_var['genotype'] = convert_data(dict(zip(gt_format, gt_data)), vcf_metadata['FORMAT'])
             sample_var['info'] = sample_info
 
