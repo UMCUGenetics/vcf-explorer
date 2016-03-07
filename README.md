@@ -28,23 +28,20 @@ cd vcf-explorer
 virtualenv env
 . env/bin/activate
 
-pip install https://github.com/mongodb/mongo-python-driver/archive/3.2.tar.gz
 pip install -r requirements.txt
 ```
 
 # Resetdb and create indexes
 ```
-python manage.py resetdb
+python vcfexplorer.py resetdb
 ```
 
 # Upload a vcf file
 ```
-python manage.py vcf path/to/file.vcf
+python vcfexplorer.py vcf gatk|delly path/to/file.vcf
 ```
 
 # Run flask development server
 ```
-python manage.py runserver -p PORT -host HOSTNAME
+python vcfexplorer.py runserver -p PORT -host HOSTNAME
 ```
-
-
