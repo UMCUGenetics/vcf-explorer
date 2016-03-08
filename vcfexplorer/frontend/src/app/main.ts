@@ -1,4 +1,9 @@
-import {bootstrap}    from 'angular2/platform/browser'
-import {AppComponent} from './app.component'
+import {bootstrap}    from 'angular2/platform/browser';
+import {HTTP_PROVIDERS} from 'angular2/http';
 
-bootstrap(AppComponent);
+import {AppComponent} from './vcf-explorer/components/vcf-explorer.component';
+
+// Add all operators to Observable
+import 'rxjs/Rx';
+
+bootstrap(AppComponent, [HTTP_PROVIDERS]);

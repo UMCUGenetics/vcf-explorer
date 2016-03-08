@@ -19,8 +19,12 @@
     "rewriteTsconfig": true
   },
   "files": [
-    "app/app.component.ts",
     "app/main.ts",
+    "app/samples/components/samples.component.ts",
+    "app/samples/services/samples.service.ts",
+    "app/variants/components/variants.component.ts",
+    "app/vcf-explorer/components/vcf-explorer.component.ts",
+    "app/vcfs/components/vcfs.component.ts",
     "typings/browser.d.ts",
     "typings/browser/ambient/es6-shim/es6-shim.d.ts",
     "typings/main.d.ts",

@@ -1,7 +1,12 @@
 <html>
   <head>
-    <title>Angular 2 QuickStart</title>
+    <base href="/">
+
+    <title>VCF Explorer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/vcf_explorer.css">
+    <link rel="stylesheet" href="/static/css/vcf_explorer_grid.css">
     <!--<link rel="stylesheet" href="styles.css">-->
 
     <!-- 1. Load libraries -->
@@ -13,11 +18,14 @@
     <script src="/static/js/lib/system.src.js"></script>
     <script src="/static/js/lib/Rx.js"></script>
     <script src="/static/js/lib/angular2.dev.js"></script>
+    <script src="/static/js/lib/router.dev.js"></script>
+    <script src="/static/js/lib/http.dev.js"></script>
 
+    <!--<script src="/static/js/lib/bootstrap.min.js"></script> -->
     <!-- 2. Configure SystemJS -->
     <script>
       System.config({
-        map: {app:'static/js/app'},
+        map: {app:'static/app'},
         packages: {
           app: {
             format: 'register',
@@ -32,6 +40,6 @@
 
   <!-- 3. Display the application -->
   <body>
-    <my-app>Loading...</my-app>
+    <vcf-explorer>Loading...</vcf-explorer>
   </body>
 </html>
