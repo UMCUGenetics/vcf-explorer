@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../static/js/app",
+    "outDir": "../static/app",
     "target": "es5",
     "module": "system",
     "moduleResolution": "node",
@@ -20,11 +20,13 @@
   },
   "files": [
     "app/main.ts",
-    "app/samples/components/samples.component.ts",
-    "app/samples/services/samples.service.ts",
-    "app/variants/components/variants.component.ts",
+    "app/sample/components/samples.component.ts",
+    "app/sample/services/samples.service.ts",
+    "app/variant/components/variants.component.ts",
+    "app/variant/services/variants.service.ts",
     "app/vcf-explorer/components/vcf-explorer.component.ts",
-    "app/vcfs/components/vcfs.component.ts",
+    "app/vcf/components/vcfs.component.ts",
+    "app/vcf/services/vcfs.service.ts",
     "typings/browser.d.ts",
     "typings/browser/ambient/es6-shim/es6-shim.d.ts",
     "typings/main.d.ts",

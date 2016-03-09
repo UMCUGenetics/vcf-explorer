@@ -4,7 +4,7 @@ import {SamplesService} from '../services/samples.service';
 
 @Component({
   selector: 'samples',
-  templateUrl:'/static/app/samples/components/samples.component.html',
+  templateUrl:'/static/app/sample/components/samples.component.html',
   providers: [SamplesService]
 })
 export class SamplesComponent implements OnInit {
