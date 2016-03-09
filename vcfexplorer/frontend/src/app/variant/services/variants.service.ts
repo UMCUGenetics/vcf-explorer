@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 export class VariantsService {
   constructor (private http: Http) {}
 
-  private _variantsUrl = '/api/variant';  // URL to web api
+  private _variantsUrl = '/api/variant/';  // URL to web api
 
   getVariants () {
     return this.http.get(this._variantsUrl)
