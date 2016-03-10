@@ -5,6 +5,9 @@
     <title>VCF Explorer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/lib/ag-grid.css">
+    <link rel="stylesheet" href="/static/css/lib/theme-fresh.css">
+
     <link rel="stylesheet" href="/static/css/vcf_explorer.css">
     <link rel="stylesheet" href="/static/css/vcf_explorer_grid.css">
     <!--<link rel="stylesheet" href="styles.css">-->
@@ -20,19 +23,33 @@
     <script src="/static/js/lib/angular2.dev.js"></script>
     <script src="/static/js/lib/router.dev.js"></script>
     <script src="/static/js/lib/http.dev.js"></script>
+    <!--<
+    <script src="/static/js/lib/ag-grid.min.js"></script>
+    <script src="/static/js/lib/agGridNg2.js"></script>-->
 
     <!--<script src="/static/js/lib/bootstrap.min.js"></script> -->
     <!-- 2. Configure SystemJS -->
     <script>
       System.config({
-        map: {app:'static/app'},
         packages: {
           app: {
             format: 'register',
             defaultExtension: 'js'
+          },
+          'ag-grid-ng2': {
+            defaultExtension: "js"
+          },
+          'ag-grid': {
+            defaultExtension: "js"
           }
+        },
+        map: {
+          app:'static/app',
+          'ag-grid-ng2': 'static/js/lib/ag-grid-ng2',
+          'ag-grid': 'static/js/lib/ag-grid'
         }
       });
+
       System.import('app/main')
             .then(null, console.error.bind(console));
     </script>

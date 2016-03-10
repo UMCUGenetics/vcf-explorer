@@ -35,6 +35,8 @@ gulp.task('copy:js_libs', ['clean'], function() {
       'node_modules/angular2/bundles/router.dev.js',
       'node_modules/angular2/bundles/http.dev.js',
       'node_modules/bootstrap/dist/js/bootstrap.min.js',
+      'node_modules/ag-grid*/**/*',
+
     ])
     .pipe(gulp.dest('../static/js/lib'))
 });
@@ -43,6 +45,8 @@ gulp.task('copy:js_libs', ['clean'], function() {
 gulp.task('copy:css_libs', ['clean'], function() {
   return gulp.src([
       'node_modules/bootstrap/dist/css/bootstrap.min.css',
+      'node_modules/ag-grid/dist/styles/ag-grid.css',
+      'node_modules/ag-grid/dist/styles/theme-fresh.css',
     ])
     .pipe(gulp.dest('../static/css/lib'))
 });

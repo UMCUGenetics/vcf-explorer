@@ -1,4 +1,8 @@
 <h1>VCFS</h1>
-<li *ngFor="#vcf of vcfs">
-  <ul>{{vcf.vcf_file}}</ul>
-</li>
+<ag-grid-ng2 #agGrid style="width: 100%; height: 350px;" class="ag-fresh"
+  [gridOptions]="gridOptions"
+  [columnDefs]="columnDefs"
+  [rowData]="vcfs"
+
+  enableColResize>
+</ag-grid-ng2>
