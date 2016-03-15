@@ -30,7 +30,11 @@ export class VCFsComponent {
 
   private createColumnDefs() {
     this.columnDefs = [
-      {headerName: "Name", field: "name",},
+      {headerName: "Name", field: "name",
+        cellRenderer: function(params: any) {
+          return '<a href="/vcf/'+params.value+'">'+params.value+'</a>';
+        }
+      },
       {headerName: "VCF file", field: "vcf_file"},
       {headerName: "Samples", field: "samples"},
     ];

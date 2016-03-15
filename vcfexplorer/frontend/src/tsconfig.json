@@ -31,7 +31,9 @@
     "app/variant/components/variants.component.ts",
     "app/variant/services/variants.service.ts",
     "app/vcf-explorer/components/vcf-explorer.component.ts",
+    "app/vcf/components/vcf.component.ts",
     "app/vcf/components/vcfs.component.ts",
+    "app/vcf/services/vcf.service.ts",
     "app/vcf/services/vcfs.service.ts",
     "typings/main.d.ts",
     "typings/main/ambient/es6-shim/es6-shim.d.ts"

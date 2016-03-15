@@ -1,6 +1,7 @@
 import {Component} from 'angular2/core';
 import {RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS} from 'angular2/router';
 import {VCFsComponent} from '../../vcf/components/vcfs.component';
+import {VCFComponent} from '../../vcf/components/vcf.component';
 import {SamplesComponent} from '../../sample/components/samples.component';
 import {VariantsComponent} from '../../variant/components/variants.component';
 
@@ -12,6 +13,7 @@ import {VariantsComponent} from '../../variant/components/variants.component';
 })
 @RouteConfig([
   { path: '/vcf', name: 'VCFs', component: VCFsComponent},
+  { path: '/vcf/:name', name: 'VCF', component: VCFComponent},
   { path: '/sample', name: 'Samples', component: SamplesComponent},
   { path: '/variant', name: 'Variants', component: VariantsComponent}
 ])
