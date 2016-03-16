@@ -1,4 +1,4 @@
-import {Component} from 'angular2/core';
+import {Component, OnInit} from 'angular2/core';
 
 import {AgGridNg2} from 'ag-grid-ng2/main';
 import {GridOptions} from 'ag-grid/main';
@@ -11,12 +11,14 @@ import {VariantsService} from '../services/variants.service';
   directives: [AgGridNg2],
   providers: [VariantsService]
 })
-export class VariantsComponent {
+export class VariantsComponent implements OnInit{
   private gridOptions: GridOptions;
   private variants: any[];
   private columnDefs: any[];
 
-  constructor(private _variantsService: VariantsService) {
+  constructor(private _variantsService: VariantsService) {}
+
+  ngOnInit(){
     this.gridOptions = <GridOptions>{};
     this.getVariants();
     this.createColumnDefs();

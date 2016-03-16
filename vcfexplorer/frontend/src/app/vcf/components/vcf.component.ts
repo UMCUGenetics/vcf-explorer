@@ -1,4 +1,4 @@
-import {Component} from 'angular2/core';
+import {Component, OnInit} from 'angular2/core';
 import {RouteParams} from 'angular2/router';
 
 import {AgGridNg2} from 'ag-grid-ng2/main';
@@ -12,7 +12,7 @@ import {VCFService} from '../services/vcf.service';
   directives: [AgGridNg2],
   providers: [VCFService]
 })
-export class VCFComponent {
+export class VCFComponent implements OnInit {
   private gridOptions: GridOptions;
   private vcf: any[];
   private vcf_variants: any[];
@@ -20,8 +20,10 @@ export class VCFComponent {
 
   constructor(
     private _VCFService: VCFService,
-    private _routeParams: RouteParams)
-  {
+    private _routeParams: RouteParams) {
+    }
+
+  ngOnInit() {
     let vcfName = this._routeParams.get('name');
     this.gridOptions = <GridOptions>{};
     this.getVCF(vcfName);

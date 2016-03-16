@@ -1,4 +1,4 @@
-import {Component} from 'angular2/core';
+import {Component, OnInit} from 'angular2/core';
 import {RouteParams} from 'angular2/router';
 
 import {AgGridNg2} from 'ag-grid-ng2/main';
@@ -13,7 +13,7 @@ import {SampleService} from '../services/sample.service';
   providers: [SampleService]
 })
 //export class SamplesComponent implements OnInit {
-export class SampleComponent {
+export class SampleComponent implements OnInit{
   private gridOptions: GridOptions;
   private sample: any[];
   private sampleVariants: any[];
@@ -21,8 +21,10 @@ export class SampleComponent {
 
   constructor(
     private _sampleService: SampleService,
-    private _routeParams: RouteParams)
-  {
+    private _routeParams: RouteParams) {
+  }
+
+  ngOnInit(){
     let sampleName = this._routeParams.get('name');
     this.gridOptions = <GridOptions>{};
     this.getSample(sampleName);

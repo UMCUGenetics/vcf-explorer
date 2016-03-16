@@ -1,4 +1,4 @@
-import {Component} from 'angular2/core';
+import {Component, OnInit} from 'angular2/core';
 
 import {AgGridNg2} from 'ag-grid-ng2/main';
 import {GridOptions} from 'ag-grid/main';
@@ -11,12 +11,14 @@ import {VCFsService} from '../services/vcfs.service';
   directives: [AgGridNg2],
   providers: [VCFsService]
 })
-export class VCFsComponent {
+export class VCFsComponent implements OnInit{
   private gridOptions: GridOptions;
   private vcfs: any[];
   private columnDefs: any[];
 
-  constructor(private _VCFsService: VCFsService) {
+  constructor(private _VCFsService: VCFsService) {}
+
+  ngOnInit() {
     this.gridOptions = <GridOptions>{};
     this.getVCFs();
     this.createColumnDefs();
