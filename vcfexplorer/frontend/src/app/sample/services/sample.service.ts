@@ -3,13 +3,18 @@ import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable';
 
 @Injectable()
-export class VariantsService {
+export class SampleService {
   constructor (private http: Http) {}
 
-  private _variantsUrl = '/api/variant/';  // URL to web api
+  private _sampleUrl = '/api/sample/';  // URL to web api
 
-  getVariants () {
-    return this.http.get(this._variantsUrl)
+  getSample(sampleName: string) {
+    return this.http.get(this._sampleUrl+sampleName)
+                    .map(res => res.json())
+                    .catch(this.handleError);
+  }
+  getSampleVariants(sampleName: string) {
+    return this.http.get(this._sampleUrl+sampleName+'/variants')
                     .map(res => res.json())
                     .catch(this.handleError);
   }

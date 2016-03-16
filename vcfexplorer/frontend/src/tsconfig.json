@@ -26,7 +26,9 @@
   },
   "files": [
     "app/main.ts",
+    "app/sample/components/sample.component.ts",
     "app/sample/components/samples.component.ts",
+    "app/sample/services/sample.service.ts",
     "app/sample/services/samples.service.ts",
     "app/variant/components/variants.component.ts",
     "app/variant/services/variants.service.ts",

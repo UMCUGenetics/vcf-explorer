@@ -22,21 +22,21 @@ export class VCFComponent {
     private _VCFService: VCFService,
     private _routeParams: RouteParams)
   {
-    let vcf_name = this._routeParams.get('name');
+    let vcfName = this._routeParams.get('name');
     this.gridOptions = <GridOptions>{};
-    this.getVCF(vcf_name);
-    this.getVCFVariants(vcf_name);
+    this.getVCF(vcfName);
+    this.getVCFVariants(vcfName);
     this.createColumnDefs();
   }
 
-  private getVCF(vcf_name: string) {
-    this._VCFService.getVCF(vcf_name).subscribe(
+  private getVCF(vcfName: string) {
+    this._VCFService.getVCF(vcfName).subscribe(
       vcf => this.vcf = vcf
     );
   }
 
-  private getVCFVariants(vcf_name: string) {
-    this._VCFService.getVCFVariants(vcf_name).subscribe(
+  private getVCFVariants(vcfName: string) {
+    this._VCFService.getVCFVariants(vcfName).subscribe(
       vcf_variants => this.vcf_variants = vcf_variants
     );
   }

@@ -32,6 +32,7 @@ export class VCFsComponent {
     this.columnDefs = [
       {headerName: "Name", field: "name",
         cellRenderer: function(params: any) {
+          // Should use router-link here!
           return '<a href="/vcf/'+params.value+'">'+params.value+'</a>';
         }
       },

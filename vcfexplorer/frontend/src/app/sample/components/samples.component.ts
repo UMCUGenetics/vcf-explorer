@@ -31,7 +31,12 @@ export class SamplesComponent {
 
   private createColumnDefs() {
     this.columnDefs = [
-      {headerName: "Name", field: "_id",},
+      {headerName: "Name", field: "_id",
+        cellRenderer: function(params: any) {
+          // Should use router-link here!
+          return '<a href="/sample/'+params.value+'">'+params.value+'</a>';
+        }
+      },
       {headerName: "VCF", field: "vcf_files"},
     ];
   }
