@@ -45,7 +45,7 @@ export class VCFComponent implements OnInit {
 
   private createColumnDefs() {
     this.columnDefs = [
-      {headerName: "CHR", field: "chr"},
+      {headerName: "Chr", field: "chr"},
       {headerName: "Pos", field: "pos"},
       {headerName: "Ref", field: "ref"},
       {headerName: "Alt", field: "alt"},

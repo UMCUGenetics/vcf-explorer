@@ -50,7 +50,10 @@ export class SampleComponent implements OnInit{
       {headerName: "Pos", field: "pos"},
       {headerName: "Ref", field: "ref"},
       {headerName: "Alt", field: "alt"},
-      {headerName: "Samples", field: "samples"},
+      {headerName: "GT", field: "gt", valueGetter: 'data.samples[0].genotype.GT'},
+      {headerName: "GQ", field: "gq", valueGetter: 'data.samples[0].genotype.GQ'},
+      {headerName: "DP", field: "dp", valueGetter: 'data.samples[0].genotype.DP'},
+      {headerName: "AD", field: "ad", valueGetter: 'data.samples[0].genotype.AD'},
     ];
   }
 
