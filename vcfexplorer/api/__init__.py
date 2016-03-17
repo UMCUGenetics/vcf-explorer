@@ -19,10 +19,10 @@ api = restful.Api(bp)
 
 # Modify api json representation
 @api.representation('application/json')
-def output_json(data, code, headers=None):
+def output_json(data, code, headers):
     """Dump bson to json and return response"""
-    response = make_response(json_util.dumps(data))
-    response.headers.extend(headers or {})
+    response = make_response(json_util.dumps(data), code)
+    response.headers.extend(headers)
     return response
 
 # Add api resources
