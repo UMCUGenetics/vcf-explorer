@@ -6,7 +6,7 @@ See mongodb docs for installation instructions: http://docs.mongodb.org/manual/i
 ## mongodb.conf
 ```
 fork = false
-bind_ip = 127.0.0.1
+bind_ip = localhost
 port = 27017
 quiet = true
 dbpath = /path/to/db
