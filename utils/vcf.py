@@ -46,22 +46,28 @@ def upload_vcf(vcf_file, vcf_type):
 
                 else:
                     if vcf_type == 'gatk':
-                        variant, variant_samples = gatk_line(line, vcf_metadata)
-                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
+                        variants, variants_samples = gatk_line(line, vcf_metadata)
+                        for variant_i, variant in enumerate(variants):
+                            variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
+                            bulk_variants.find({'_id':variant_id}).upsert().update({
+                                '$push': {'samples': {'$each': variants_samples[variant_i]}},
+                                '$set': variant,
+                                }
+                            )
 
                     elif vcf_type == 'delly':
                         variant, variant_samples = delly_line(line, vcf_metadata)
                         variant_id = '{}-{}-{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'], variant['CHR2'], variant['END'])
+                        bulk_variants.find({'_id':variant_id}).upsert().update({
+                            '$push': {'samples': {'$each': variant_samples}},
+                            '$set': variant,
+                            }
+                        )
 
-                    bulk_variants.find({'_id':variant_id}).upsert().update({
-                        '$push': {'samples': {'$each': variant_samples}},
-                        '$set': variant,
-                        }
-                    )
                     variant_count += 1
                     if variant_count == 10000:
                         bulk_variants.execute()
-                        bulk_variants = variants.initialize_unordered_bulk_op()
+                        bulk_variants = db.variants.initialize_unordered_bulk_op()
                         variant_count = 0
 
         bulk_variants.execute() # insert remaining variants
@@ -106,62 +112,55 @@ def vcf_header(line):
 
 def gatk_line(line, vcf_metadata):
     fields = line.split('\t')
-    external_ids = fields[2].split(',')
+    #external_ids = fields[2].split(',')
     gt_format = fields[8].split(':')
+    variants = []
+    variants_samples = []
+    ### Adjust pos if alt and ref bases are the same? -> indel
+    ### See minimal representation from exac: https://github.com/konradjk/exac_browser/blob/master/utils.py
 
-    ### Inmplement later: Variant per alternative allel.
-    ### Adjust pos if alt and ref bases are the same?
-    ### How to handle 1/2 variants?
-    variant = {}
-    variant['chr'] = fields[0]
-    variant['pos'] = int(fields[1])
-    variant['ref'] = fields[3]
-    variant['alt'] = fields[4]
-    #variant['qual'] = fields[5];
+    ## Different variant per alt allele
+    # How to handle 1/2 variants?
+    # https://github.com/samtools/hts-specs/issues/77
+    alt_alleles = fields[4].split(',')
+    for alt_i, alt_allele in enumerate(alt_alleles):
+        variant = {
+            'chr': fields[0],
+            'pos' : int(fields[1]),
+            'ref' : fields[3],
+            'alt' : alt_allele,
+        }
+        #variant['qual'] = fields[5];
 
-    #allele_counts = {
-        #'total_ac': 0,
-        #'alt_ac': 0,
-        #'raw_total_ac': 0,
-        #'raw_alt_ac': 0
-    #}
+        ## Parse external database id's
+        ### Split per alternative allele?
+        #for external_id in external_ids:
+            #if external_id.startswith('rs'):
+                #variant['dbSNP'] = external_id
 
-    ## Parse external database id's
-    for external_id in external_ids:
-        if external_id.startswith('rs'):
-            variant['dbSNP'] = external_id
+        variants.append(variant)
 
-    ## Parse samples
-    variant_samples = []
-    for j, sample in enumerate(vcf_metadata['samples']):
-        gt_data = fields[9+j].split(':')
-        if(gt_data[0] != './.' and gt_data[0] != '0/0'):
-            sample_var = {}
-            sample_var['genotype'] = convert_data(dict(zip(gt_format, gt_data)), vcf_metadata['FORMAT'])
-            sample_var['sample'] = sample
-            sample_var['vcf_id'] = vcf_metadata['_id']
+        ## Parse samples
+        variant_samples = []
+        for sample_i, sample in enumerate(vcf_metadata['samples']):
+            sample_gt_data = fields[9+sample_i].split(':')
+            if(sample_gt_data[0] != './.' and sample_gt_data[0] != '0/0'):
+                sample_gt_data = split_genotype_field(sample_gt_data, gt_format, alt_i)
 
-            if fields[6] == "PASS" or fields[6] ==".":
-                pass
-                # Count alleles passed variants
-                #if(gt_data[0] == '1/1'):
-                    #allele_counts['alt_ac'] += 2
-                    #allele_counts['raw_alt_ac'] += 2
-                #elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
-                    #allele_counts['alt_ac'] += 1
-                    #allele_counts['raw_alt_ac'] += 1
+                if sample_gt_data[0] != "0/*":
+                    sample_var = {}
+                    sample_var['genotype'] = convert_data(dict(zip(gt_format, sample_gt_data)), vcf_metadata['FORMAT'])
+                    sample_var['sample'] = sample
+                    sample_var['vcf_id'] = vcf_metadata['_id']
 
-            else: #Variant is filtered
-                sample_var['filter'] = fields[6]
-                # Count alleles filtered variants
-                #raw_total_allele_count += 2
-                #if(gt_data[0] == '1/1'):
-                    #allele_counts['raw_alt_ac'] += 2
-                #elif(gt_data[0] == '0/1' or gt_data[0] == '1/0'):
-                    #allele_counts['raw_alt_ac'] += 1
-            variant_samples.append(sample_var)
+                    if fields[6] == "PASS" or fields[6] ==".":
+                        pass
+                    else: #Variant is filtered
+                        sample_var['filter'] = fields[6]
+                    variant_samples.append(sample_var)
 
-    return variant, variant_samples
+        variants_samples.append(variant_samples)
+    return variants, variants_samples
 
 def delly_line(line, vcf_metadata):
     fields = line.split('\t')
@@ -214,16 +213,46 @@ def get_info_fields(fields, info_fields):
 
 def convert_data(data, metadata):
     for id in data:
-        if ',' in data[id]:
-            data[id] = data[id].split(',')
-            if metadata[id]['type']  == "Integer":
-                data[id] = map(int, data[id])
-            elif metadata[id]['type']  == "Float":
-                data[id] = map(float, data[id])
+        if data[id] != ".":
+            if ',' in data[id]:
+                data[id] = data[id].split(',')
+                if metadata[id]['type']  == "Integer":
+                    data[id] = map(int, data[id])
+                elif metadata[id]['type']  == "Float":
+                    data[id] = map(float, data[id])
 
-        else:
-            if metadata[id]['type']  == "Integer":
-                data[id] = int(data[id])
-            elif metadata[id]['type']  == "Float":
-                data[id] = float(data[id])
+                else:
+                    if metadata[id]['type']  == "Integer":
+                        data[id] = int(data[id])
+                    elif metadata[id]['type']  == "Float":
+                        data[id] = float(data[id])
     return data
+
+def split_genotype_field(gt_data, gt_format, alt_index, allele_symbol = '*'):
+    """
+    Split genotype field
+    """
+    for gt_i, gt_field in enumerate(gt_data):
+        gt_key = gt_format[gt_i]
+
+        if gt_key == 'GT': # For now only parse GT and AD also change PL?
+            gt = gt_field.split('/') #probably should add phased variant split |
+            ref = allele_symbol
+            alt = allele_symbol
+
+            if gt[0] == gt[1]: #hom call
+                ref = '1'
+                alt = '1'
+            else: #het call
+                if (int(gt[0]) == alt_index + 1 or int(gt[1]) == alt_index + 1):
+                    alt = '1'
+                if (int(gt[0]) == 0 or int(gt[1]) == 0):
+                    ref = '0'
+            # Adjust the genotype
+            gt_data[gt_i] = '{0}/{1}'.format(ref, alt)
+
+        elif gt_key == 'AD':
+            if gt_field != ".":
+                ad = gt_field.split(',')
+                gt_data[gt_i] = ','.join([ad[0],ad[alt_index]])
+    return gt_data
