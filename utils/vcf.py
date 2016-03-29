@@ -116,19 +116,18 @@ def gatk_line(line, vcf_metadata):
     gt_format = fields[8].split(':')
     variants = []
     variants_samples = []
-    ### Adjust pos if alt and ref bases are the same? -> indel
-    ### See minimal representation from exac: https://github.com/konradjk/exac_browser/blob/master/utils.py
 
     ## Different variant per alt allele
-    # How to handle 1/2 variants?
+    # 1/2 variants are splitted into two variants with genotype: 1/-
     # https://github.com/samtools/hts-specs/issues/77
     alt_alleles = fields[4].split(',')
     for alt_i, alt_allele in enumerate(alt_alleles):
+        pos, ref, alt = get_minimal_representation(fields[1], fields[3], alt_allele)
         variant = {
             'chr': fields[0],
-            'pos' : int(fields[1]),
-            'ref' : fields[3],
-            'alt' : alt_allele,
+            'pos' : pos,
+            'ref' : ref,
+            'alt' : alt,
         }
         #variant['qual'] = fields[5];
 
@@ -147,7 +146,7 @@ def gatk_line(line, vcf_metadata):
             if(sample_gt_data[0] != './.' and sample_gt_data[0] != '0/0'):
                 sample_gt_data = split_genotype_field(sample_gt_data, gt_format, alt_i)
 
-                if sample_gt_data[0] != "0/*":
+                if sample_gt_data[0] != "0/-":
                     sample_var = {}
                     sample_var['genotype'] = convert_data(dict(zip(gt_format, sample_gt_data)), vcf_metadata['FORMAT'])
                     sample_var['sample'] = sample
@@ -228,7 +227,7 @@ def convert_data(data, metadata):
                         data[id] = float(data[id])
     return data
 
-def split_genotype_field(gt_data, gt_format, alt_index, allele_symbol = '*'):
+def split_genotype_field(gt_data, gt_format, alt_index, allele_symbol = '-'):
     """
     Split genotype field
     """
@@ -256,3 +255,34 @@ def split_genotype_field(gt_data, gt_format, alt_index, allele_symbol = '*'):
                 ad = gt_field.split(',')
                 gt_data[gt_i] = ','.join([ad[0],ad[alt_index]])
     return gt_data
+
+def get_minimal_representation(pos, ref, alt):
+    """
+    ExAC - MIT License (MIT)
+    Copyright (c) 2014, Konrad Karczewski, Daniel MacArthur, Brett Thomas, Ben Weisburd
+
+    Get the minimal representation of a variant, based on the ref + alt alleles in a VCF
+    This is used to make sure that multiallelic variants in different datasets,
+    with different combinations of alternate alleles, can always be matched directly.
+    Args:
+        pos (int): genomic position in a chromosome (1-based)
+        ref (str): ref allele string
+        alt (str): alt allele string
+    Returns:
+        tuple: (pos, ref, alt) of remapped coordinate
+    """
+    pos = int(pos)
+    # If it's a simple SNV, don't remap anything
+    if len(ref) == 1 and len(alt) == 1:
+        return pos, ref, alt
+    else:
+        # strip off identical suffixes
+        while(alt[-1] == ref[-1] and min(len(alt),len(ref)) > 1):
+            alt = alt[:-1]
+            ref = ref[:-1]
+        # strip off identical prefixes and increment position
+        while(alt[0] == ref[0] and min(len(alt),len(ref)) > 1):
+            alt = alt[1:]
+            ref = ref[1:]
+            pos += 1
+        return pos, ref, alt
