@@ -15,22 +15,28 @@ from helper import deep_update
 
 def upload_vcf(vcf_file, vcf_type):
     """
-    Parse and upload vcf files.
+    Parse and upload vcf files in bulk.
 
+    Args:
+        vcf_file (str): Path to vcf file
+        vcf_type (str): gatk | delly specifying vcf type.
     """
+    vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
+    # Setup bulk upload variables
     variant_count = 0
     bulk_variants = db.variants.initialize_unordered_bulk_op()
-    vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
 
     if db.vcfs.find({'name':vcf_name}).limit(1).count() > 0:
         sys.exit("Error: Duplicate vcf name.")
 
+    # Setup vcf metadata dictonary, upload to vcfs collection
     vcf_metadata = {
         '_id': bson.objectid.ObjectId(),
         'name': vcf_name,
         'vcf_file': vcf_file,
         'upload_date' : datetime.now()
     }
+
     try:
         f = open(vcf_file, 'r')
     except IOError:
@@ -40,10 +46,12 @@ def upload_vcf(vcf_file, vcf_type):
             for line in f:
                 line = line.strip('\n')
 
+                # Parse header lines
                 if line.startswith('#'):
                     header_line_metadata = vcf_header(line)
                     deep_update(vcf_metadata, header_line_metadata)
 
+                # Parse variant lines
                 else:
                     if vcf_type == 'gatk':
                         variants, variants_samples = gatk_line(line, vcf_metadata)
@@ -54,6 +62,7 @@ def upload_vcf(vcf_file, vcf_type):
                                 '$set': variant,
                                 }
                             )
+                            variant_count += len(variants)
 
                     elif vcf_type == 'delly':
                         variant, variant_samples = delly_line(line, vcf_metadata)
@@ -63,20 +72,26 @@ def upload_vcf(vcf_file, vcf_type):
                             '$set': variant,
                             }
                         )
+                        variant_count += 1
 
-                    variant_count += 1
+                    # Upload variants in bulk
                     if variant_count == 10000:
                         bulk_variants.execute()
                         bulk_variants = db.variants.initialize_unordered_bulk_op()
                         variant_count = 0
 
-        bulk_variants.execute() # insert remaining variants
-        # Store run/vcf metadata in vcfs collection
+        # insert remaining variants and insert vcf metadata to vcfs collection
+        bulk_variants.execute()
         db.vcfs.insert_one(vcf_metadata)
 
 def vcf_header(line):
     """
-    Parse gatk header line and return metadata dictonary
+    Parse vcf header line
+
+    Args:
+        line (str): vcf header line
+    Returns:
+        dict: metadata dictonary
     """
     line_metadata = {}
     if line.startswith('##FILTER') or line.startswith('##ALT'):
@@ -111,17 +126,31 @@ def vcf_header(line):
     return line_metadata
 
 def gatk_line(line, vcf_metadata):
+    """
+    Parse gatk variant line.
+    VCF lines containing multiple alternative alleles are splitted by alternative allele and
+    get a minimal (left aligned) representation. Sample information (e.g. genotype)
+    is added to seperate list of sample dictionaries to be able to update exisiting variants.
+
+    Args:
+        line (str): gatk vcf variant line
+        vcf_metadata (dict): metadata dictonary containing vcf header data
+    Returns:
+        list: variants, list of variant dictionaries.
+        list: variants_samples, list of variant samples lists.
+    """
+    # Setup general variables
     fields = line.split('\t')
-    #external_ids = fields[2].split(',')
+    #external_ids = fields[2].split(',') # Split per alternative allele?
     gt_format = fields[8].split(':')
     variants = []
     variants_samples = []
 
-    ## Different variant per alt allele
+    # Different variant per alt allele
     # 1/2 variants are splitted into two variants with genotype: 1/-
     # https://github.com/samtools/hts-specs/issues/77
     alt_alleles = fields[4].split(',')
-    for alt_i, alt_allele in enumerate(alt_alleles):
+    for alt_index, alt_allele in enumerate(alt_alleles):
         pos, ref, alt = get_minimal_representation(fields[1], fields[3], alt_allele)
         variant = {
             'chr': fields[0],
@@ -129,33 +158,28 @@ def gatk_line(line, vcf_metadata):
             'ref' : ref,
             'alt' : alt,
         }
-        #variant['qual'] = fields[5];
-
-        ## Parse external database id's
-        ### Split per alternative allele?
-        #for external_id in external_ids:
-            #if external_id.startswith('rs'):
-                #variant['dbSNP'] = external_id
-
         variants.append(variant)
 
-        ## Parse samples
+        # Parse samples
         variant_samples = []
-        for sample_i, sample in enumerate(vcf_metadata['samples']):
-            sample_gt_data = fields[9+sample_i].split(':')
-            if(sample_gt_data[0] != './.' and sample_gt_data[0] != '0/0'):
-                sample_gt_data = split_genotype_field(sample_gt_data, gt_format, alt_i)
-
+        for sample_index, sample in enumerate(vcf_metadata['samples']):
+            sample_gt_data = fields[9+sample_index].split(':')
+            # Skip variant if no or reference call.
+            if(sample_gt_data[gt_format.index('GT')] != './.' and sample_gt_data[gt_format.index('GT')] != '0/0'):
+                sample_gt_data = adjust_genotype(sample_gt_data, gt_format, alt_index)
+                # Skip reference call after splitting alternative alleles.
                 if sample_gt_data[0] != "0/-":
                     sample_var = {}
                     sample_var['genotype'] = convert_data(dict(zip(gt_format, sample_gt_data)), vcf_metadata['FORMAT'])
                     sample_var['sample'] = sample
                     sample_var['vcf_id'] = vcf_metadata['_id']
 
+                    # Set filter field
                     if fields[6] == "PASS" or fields[6] ==".":
                         pass
-                    else: #Variant is filtered
+                    else:
                         sample_var['filter'] = fields[6]
+
                     variant_samples.append(sample_var)
 
         variants_samples.append(variant_samples)
@@ -211,6 +235,15 @@ def get_info_fields(fields, info_fields):
     return info
 
 def convert_data(data, metadata):
+    """
+    Convert vcf data using metadata dictonary
+
+    Args:
+        data (dict): dictonary with str values
+        metadata (dict): metadata dictonary containing vcf header data needed to convert values in data dict
+    Returns:
+        data (dict): converted data dictonary
+    """
     for id in data:
         if data[id] != ".":
             if ',' in data[id]:
@@ -227,14 +260,23 @@ def convert_data(data, metadata):
                         data[id] = float(data[id])
     return data
 
-def split_genotype_field(gt_data, gt_format, alt_index, allele_symbol = '-'):
+def adjust_genotype(gt_data, gt_format, alt_index, allele_symbol = '-'):
     """
-    Split genotype field
+    Adjust genotype fields by alternative allele index
+
+    Args:
+        gt_data (list): sample genotype data as list
+        gt_format (list): vcf gt format column as list
+        alt_index (int): Alternative allele index
+        allele_symbol (str): replacment genotype symbol for overlapping variants
+    Returns:
+        gt_data (list): Adjusted gt data
+
     """
     for gt_i, gt_field in enumerate(gt_data):
         gt_key = gt_format[gt_i]
-
-        if gt_key == 'GT': # For now only parse GT and AD also change PL?
+        # For now only parse GT and AD also change PL?
+        if gt_key == 'GT':
             gt = gt_field.split('/') #probably should add phased variant split |
             ref = allele_symbol
             alt = allele_symbol
