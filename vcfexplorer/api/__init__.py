@@ -28,13 +28,13 @@ def output_json(data, code, headers):
 # Add api resources
 api.add_resource(Root, '/')
 
-api.add_resource(VCFs, '/vcf/')
-api.add_resource(VCF, '/vcf/<string:vcf_name>')
-api.add_resource(VCFVariants, '/vcf/<string:vcf_name>/variants')
+api.add_resource(VCFs, '/vcfs/')
+api.add_resource(VCF, '/vcfs/<string:vcf_name>')
+api.add_resource(VCFVariants, '/vcfs/<string:vcf_name>/variants')
 
-api.add_resource(Samples, '/sample/')
-api.add_resource(Sample, '/sample/<string:sample_name>')
-api.add_resource(SampleVariants, '/sample/<string:sample_name>/variants')
+api.add_resource(Samples, '/samples/')
+api.add_resource(Sample, '/samples/<string:sample_name>')
+api.add_resource(SampleVariants, '/samples/<string:sample_name>/variants')
 
-api.add_resource(Variants, '/variant/')
-api.add_resource(Variant, '/variant/<string:variant_id>')
+api.add_resource(Variants, '/variants/')
+api.add_resource(Variant, '/variants/<string:variant_id>')
