@@ -14,6 +14,9 @@ common_reqparse = reqparse.RequestParser()
 common_reqparse.add_argument('limit', type = int, default = 20)
 common_reqparse.add_argument('offset', type = int, default = 0)
 
+common_reqparse.add_argument('sort_field', type = str, default = '')
+common_reqparse.add_argument('sort_order', type = int, default = 1)
+
 class VCFs(Resource):
     def get(self):
         """
@@ -184,6 +187,10 @@ class Variants(Resource):
         }
 
         variants = db.variants.find(projection=db_projection, skip=args['offset'], limit=args['limit'])
+
+        ## Sorting
+        if args['sort_field']:
+            variants = variants.sort(args['sort_field'],args['sort_order'])
 
         if variants.count():
             return variants

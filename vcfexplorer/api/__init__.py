@@ -22,7 +22,8 @@ api = restful.Api(bp)
 def output_json(data, code, headers):
     """Dump bson to json and return response"""
     response = make_response(json_util.dumps(data), code)
-    response.headers.extend(headers)
+    print response.__dict__
+    response.headers.extend(headers or {})
     return response
 
 # Add api resources
