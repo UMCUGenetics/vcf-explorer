@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 export class SampleService {
   constructor (private http: Http) {}
 
-  private _sampleUrl = '/api/sample/';  // URL to web api
+  private _sampleUrl = '/api/samples/';  // URL to web api
 
   getSample(sampleName: string) {
     return this.http.get(this._sampleUrl+sampleName)

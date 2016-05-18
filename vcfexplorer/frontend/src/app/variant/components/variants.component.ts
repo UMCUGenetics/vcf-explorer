@@ -24,20 +24,15 @@ export class VariantsComponent implements OnInit{
   }
 
   dataSource = {
-      //rowCount : -1,
-      pageSize: 10,
+      pageSize: 2,
       overflowSize: 100,
 
       getRows: (params: any) => {
           var limit = params.endRow - params.startRow;
           var offset = params.startRow;
-          this._variantsService.getVariants(limit,offset).subscribe(rowData => {
-              //var rowsThisPage = rowData.slice(params.startRow, params.endRow);
-              var rowsThisPage = rowData;
+          this._variantsService.getVariants(limit,offset).subscribe(rowsThisPage => {
+              //var rowsThisPage = rowData;
               var lastRow = -1;
-              //if (rowData.length <= params.endRow) {
-              //lastRow = rowData.length;
-              //}
               // call the success callback
               params.successCallback(rowsThisPage, lastRow);
           });
