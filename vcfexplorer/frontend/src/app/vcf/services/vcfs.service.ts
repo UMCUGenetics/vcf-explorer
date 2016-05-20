@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 export class VCFsService {
   constructor (private http: Http) {}
 
-  private _vcfsUrl = '/api/vcf/';  // URL to web api
+  private _vcfsUrl = '/api/vcfs/';  // URL to web api
 
   getVCFs () {
     return this.http.get(this._vcfsUrl)

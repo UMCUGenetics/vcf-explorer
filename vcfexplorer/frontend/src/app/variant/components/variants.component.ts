@@ -13,21 +13,30 @@ import {VariantsService} from '../services/variants.service';
 })
 export class VariantsComponent implements OnInit{
   private gridOptions: GridOptions;
-  private variants: any[];
   private columnDefs: any[];
 
   constructor(private _variantsService: VariantsService) {}
 
   ngOnInit(){
     this.gridOptions = <GridOptions>{};
-    this.getVariants();
+    this.gridOptions.datasource = this.dataSource;
     this.createColumnDefs();
   }
 
-  private getVariants() {
-    this._variantsService.getVariants().subscribe(
-      variants => this.variants = variants
-    );
+  dataSource = {
+      pageSize: 2,
+      overflowSize: 100,
+
+      getRows: (params: any) => {
+          var limit = params.endRow - params.startRow;
+          var offset = params.startRow;
+          this._variantsService.getVariants(limit,offset).subscribe(rowsThisPage => {
+              //var rowsThisPage = rowData;
+              var lastRow = -1;
+              // call the success callback
+              params.successCallback(rowsThisPage, lastRow);
+          });
+      }
   }
 
   private createColumnDefs() {

@@ -2,7 +2,8 @@
 <ag-grid-ng2 #agGrid style="width: 100%; height: 350px;" class="ag-fresh"
   [gridOptions]="gridOptions"
   [columnDefs]="columnDefs"
-  [rowData]="variants"
+
+  rowModelType = "pagination"
 
   enableColResize>
 </ag-grid-ng2>

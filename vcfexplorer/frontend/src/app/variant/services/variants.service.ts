@@ -6,10 +6,10 @@ import {Observable} from 'rxjs/Observable';
 export class VariantsService {
   constructor (private http: Http) {}
 
-  private _variantsUrl = '/api/variant/';  // URL to web api
+  private _variantsUrl = '/api/variants/';  // URL to web api
 
-  getVariants () {
-    return this.http.get(this._variantsUrl)
+  getVariants(limit=20, offset=0) {
+    return this.http.get(this._variantsUrl+"?limit="+limit+"&offset="+offset)
                     .map(res => res.json())
                     .catch(this.handleError);
   }

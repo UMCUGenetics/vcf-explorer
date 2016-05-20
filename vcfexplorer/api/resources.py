@@ -9,6 +9,14 @@ import pymongo
 
 from ..helpers import get_mongodb
 
+## Common argument parsing
+common_reqparse = reqparse.RequestParser()
+common_reqparse.add_argument('limit', type = int, default = 20)
+common_reqparse.add_argument('offset', type = int, default = 0)
+
+common_reqparse.add_argument('sort_field', type = str, default = '')
+common_reqparse.add_argument('sort_order', type = int, default = 1)
+
 class VCFs(Resource):
     def get(self):
         """
@@ -41,7 +49,7 @@ class VCFVariants(Resource):
         """
         Setup argument parsing
         """
-        self.reqparse = reqparse.RequestParser()
+        self.reqparse = common_reqparse.copy()
         self.reqparse.add_argument('filtered_vars', type = bool, default = False)
         super(VCFVariants, self).__init__()
 
@@ -131,7 +139,7 @@ class SampleVariants(Resource):
         """
         Setup argument parsing
         """
-        self.reqparse = reqparse.RequestParser()
+        self.reqparse = common_reqparse.copy()
         self.reqparse.add_argument('filtered_vars', type = bool, default = False)
         super(SampleVariants, self).__init__()
 
@@ -160,17 +168,29 @@ class SampleVariants(Resource):
             abort(404)
 
 class Variants(Resource):
+    def __init__(self):
+        """
+        Setup argument parsing
+        """
+        self.reqparse = common_reqparse.copy()
+        super(Variants, self).__init__()
+
     def get(self):
         """
         Return all variants
         """
+        args = self.reqparse.parse_args()
         db = get_mongodb()
 
         db_projection = {
             'samples' : 0
         }
 
-        variants = db.variants.find(projection=db_projection)
+        variants = db.variants.find(projection=db_projection, skip=args['offset'], limit=args['limit'])
+
+        ## Sorting
+        if args['sort_field']:
+            variants = variants.sort(args['sort_field'],args['sort_order'])
 
         if variants.count():
             return variants
