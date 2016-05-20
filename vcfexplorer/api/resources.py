@@ -11,7 +11,7 @@ from ..helpers import get_mongodb
 
 ## Common argument parsing
 common_reqparse = reqparse.RequestParser()
-common_reqparse.add_argument('limit', type = int, default = 20)
+common_reqparse.add_argument('limit', type = int, default = 1)
 common_reqparse.add_argument('offset', type = int, default = 0)
 
 common_reqparse.add_argument('sort_field', type = str, default = '')
@@ -98,21 +98,38 @@ class VCFVariants(Resource):
             abort(404)
 
 class Samples(Resource):
+    def __init__(self):
+        """
+        Setup argument parsing
+        """
+        self.reqparse = common_reqparse.copy()
+        super(Samples, self).__init__()
+
     def get(self):
         """
         Return all samples
         """
+        args = self.reqparse.parse_args()
         db = get_mongodb()
 
         pipeline = [
-            {"$unwind": "$samples"},
+            {"$unwind": "$samples"}
+        ]
+
+        if args['sort_field']:
+            pipeline.append({"$sort": {args['sort_field']: args['sort_order']} })
+
+        pipeline.extend([
+            {"$skip": args['offset']},
+            {"$limit": args['limit']},
             {"$group": {
                 "_id": "$samples",
                 "vcf_files": {"$push": "$vcf_file"},
                 "upload_date": {"$last": "$upload_date"}
                 }
             }
-        ]
+        ])
+        print pipeline
         samples = db.vcfs.aggregate(pipeline)
 
         if samples.alive:
@@ -193,7 +210,7 @@ class Variants(Resource):
             variants = variants.sort(args['sort_field'],args['sort_order'])
 
         if variants.count():
-            return variants
+            return [variants, variants.count()]
         else:
             abort(404)
 

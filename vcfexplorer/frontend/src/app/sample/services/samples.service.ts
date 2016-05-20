@@ -8,8 +8,8 @@ export class SamplesService {
 
   private _samplesUrl = '/api/samples/';  // URL to web api
 
-  getSamples () {
-    return this.http.get(this._samplesUrl)
+  getSamples (limit=20, offset=0) {
+    return this.http.get(this._samplesUrl+"?limit="+limit+"&offset="+offset)
                     .map(res => res.json())
                     .catch(this.handleError);
   }

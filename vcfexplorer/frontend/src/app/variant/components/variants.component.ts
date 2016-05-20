@@ -30,9 +30,9 @@ export class VariantsComponent implements OnInit{
       getRows: (params: any) => {
           var limit = params.endRow - params.startRow;
           var offset = params.startRow;
-          this._variantsService.getVariants(limit,offset).subscribe(rowsThisPage => {
-              //var rowsThisPage = rowData;
-              var lastRow = -1;
+          this._variantsService.getVariants(limit,offset).subscribe(rowData => {
+              var rowsThisPage = rowData[0];
+              var lastRow = rowData[1];
               // call the success callback
               params.successCallback(rowsThisPage, lastRow);
           });
