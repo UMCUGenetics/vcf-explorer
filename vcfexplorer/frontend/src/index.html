@@ -12,46 +12,18 @@
     <link rel="stylesheet" href="/static/css/vcf_explorer_grid.css">
     <!--<link rel="stylesheet" href="styles.css">-->
 
-    <!-- 1. Load libraries -->
-    <!-- IE required polyfills, in this exact order
-    <script src="node_modules/es6-shim/es6-shim.min.js"></script>
-    <script src="node_modules/systemjs/dist/system-polyfills.js"></script>
-    <script src="node_modules/angular2/es6/dev/src/testing/shims_for_IE.js"></script> -->
-    <script src="/static/js/lib/angular2-polyfills.js"></script>
+    <!-- Polyfill(s) for older browsers -->
+    <script src="/static/js/lib/es6-shim.min.js"></script>
+    <script src="/static/js/lib/zone.js"></script>
+    <script src="/static/js/lib/Reflect.js"></script>
     <script src="/static/js/lib/system.src.js"></script>
-    <script src="/static/js/lib/Rx.js"></script>
-    <script src="/static/js/lib/angular2.dev.js"></script>
-    <script src="/static/js/lib/router.dev.js"></script>
-    <script src="/static/js/lib/http.dev.js"></script>
-    <!--<
-    <script src="/static/js/lib/ag-grid.min.js"></script>
-    <script src="/static/js/lib/agGridNg2.js"></script>-->
+
 
     <!--<script src="/static/js/lib/bootstrap.min.js"></script> -->
     <!-- 2. Configure SystemJS -->
+    <script src="/static/systemjs.config.js"></script>
     <script>
-      System.config({
-        packages: {
-          app: {
-            format: 'register',
-            defaultExtension: 'js'
-          },
-          'ag-grid-ng2': {
-            defaultExtension: "js"
-          },
-          'ag-grid': {
-            defaultExtension: "js"
-          }
-        },
-        map: {
-          app:'static/app',
-          'ag-grid-ng2': 'static/js/lib/ag-grid-ng2',
-          'ag-grid': 'static/js/lib/ag-grid'
-        }
-      });
-
-      System.import('app/main')
-            .then(null, console.error.bind(console));
+      System.import('app').catch(function(err){ console.error(err); });
     </script>
   </head>
 
