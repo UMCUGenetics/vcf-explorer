@@ -211,13 +211,14 @@ def gatk_line(line, vcf_metadata):
 
                 # CADD field
                 elif info_line.split("=")[0].startswith("CADD"):
-                    if "CADD" not in info_dict[alt_alleles[alt]].keys():
-                        info_dict[alt_alleles[alt]]["CADD"] = {}
+                    if "CADDv1-3" not in info_dict[alt_alleles[alt]].keys():
+                        info_dict[alt_alleles[alt]]["CADDv1-3"] = {}
                     keys, values = createKeyVals(info_line, alt)
 
-                    info_dict[alt_alleles[alt]]["CADD"][keys.replace(".", "-")] = values
+                    # Remove CADDv1-3 of keys
+                    info_dict[alt_alleles[alt]]["CADDv1-3"][keys.replace(".", "-")] = values
                     # Convert datatype based on header (meta data) information
-                    info_dict[alt_alleles[alt]]["CADD"] = convert_data(info_dict[alt_alleles[alt]]["CADD"], vcf_metadata['INFO'])
+                    info_dict[alt_alleles[alt]]["CADDv1-3"] = convert_data(info_dict[alt_alleles[alt]]["CADDv1-3"], vcf_metadata['INFO'])
 
                 # 'Other' field
                 else:
