@@ -62,5 +62,8 @@ mongodb.conf
 # OSX
 .DS_Store
 
-# Bower
-vcfexplorer/frontend/static/bower_components
+# NPM
+node_modules
+typings
+static
+templates

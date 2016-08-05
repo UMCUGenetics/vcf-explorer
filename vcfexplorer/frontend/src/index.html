@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <base href="/">
+
+    <title>VCF Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/lib/ag-grid.css">
+    <link rel="stylesheet" href="/static/css/lib/theme-fresh.css">
+
+    <link rel="stylesheet" href="/static/css/vcf_explorer.css">
+    <link rel="stylesheet" href="/static/css/vcf_explorer_grid.css">
+    <!--<link rel="stylesheet" href="styles.css">-->
+
+    <!-- Polyfill(s) for older browsers -->
+    <script src="/static/js/lib/es6-shim.min.js"></script>
+    <script src="/static/js/lib/zone.js"></script>
+    <script src="/static/js/lib/Reflect.js"></script>
+    <script src="/static/js/lib/system.src.js"></script>
+
+
+    <!--<script src="/static/js/lib/bootstrap.min.js"></script> -->
+    <!-- 2. Configure SystemJS -->
+    <script src="/static/systemjs.config.js"></script>
+    <script>
+      System.import('app').catch(function(err){ console.error(err); });
+    </script>
+  </head>
+
+  <!-- 3. Display the application -->
+  <body>
+    <vcf-explorer>Loading...</vcf-explorer>
+  </body>
+</html>
