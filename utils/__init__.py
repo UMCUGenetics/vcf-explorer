@@ -5,5 +5,5 @@ connection = pymongo.MongoClient("mongodb://localhost")
 db = connection.vcf_explorer
 
 import database
-import vcf
+import parse_vcf
 import query

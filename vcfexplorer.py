@@ -15,7 +15,7 @@ def runserver(args):
     app.run(host=args.hostname, port=args.port)
 
 def loadvcf(args):
-    utils.vcf.upload_vcf(args.vcf_file, args.vcf_type)
+    utils.parse_vcf.upload_vcf(args.vcf_file, args.vcf_template)
 
 def resetdb(args):
     utils.database.resetdb()
@@ -34,7 +34,8 @@ if __name__ == "__main__":
 
     # VCF file arguments
     vcf_file = argparse.ArgumentParser(add_help=False)
-    vcf_file.add_argument('vcf_type', help='VCF type', choices=['gatk', 'delly'])
+    #vcf_file.add_argument('vcf_type', help='VCF type', choices=['gatk', 'delly'])
+    vcf_file.add_argument('vcf_template', help='path/to/vcf_type_template.json')
     vcf_file.add_argument('vcf_file', help='path/to/file.vcf')
 
     # Server arguments
