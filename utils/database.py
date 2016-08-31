@@ -15,9 +15,9 @@ def create_indexes():
     db.vcfs.create_index("name")
     db.vcfs.create_index("samples")
     db.vcfs.create_index( [ ("filename", pymongo.ASCENDING), ("fileformat", pymongo.ASCENDING), ("filedate", pymongo.ASCENDING) ], sparse=True )
-    #db.vcfs.create_index("INFO")
-    #db.vcfs.create_index("FORMAT")
-    #db.vcfs.create_index("FILTER")
+    db.vcfs.create_index("INFO")
+    db.vcfs.create_index("FORMAT")
+    db.vcfs.create_index("FILTER")
 
     # Variant collection indexes
     db.variants.drop_indexes()

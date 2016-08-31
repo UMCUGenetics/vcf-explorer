@@ -17,12 +17,13 @@ from helper import deep_update
 
 def upload_vcf(vcf_file, vcf_template):
     """
-    Parse and upload vcf files in bulk.
+    Parse vcf files and upload variants using bulk functionality of mongodb.
 
     Args:
         vcf_file (str): Path to vcf file
     """
     vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
+
     # Setup bulk upload variables
     variant_count = 0
     bulk_variants = db.variants.initialize_unordered_bulk_op()
@@ -30,6 +31,7 @@ def upload_vcf(vcf_file, vcf_template):
     if db.vcfs.find({'name':vcf_name}).limit(1).count() > 0:
         sys.exit("Error: Duplicate vcf name.")
 
+    #Open vcf template file
     try:
         f = open(vcf_template, 'r')
     except IOError:
@@ -38,6 +40,7 @@ def upload_vcf(vcf_file, vcf_template):
         with f:
             vcf_template = json.load(f)
 
+    #Open vcf file
     try:
         vcf = py_vcf.Reader(open(vcf_file, 'r'))
     except IOError:
@@ -54,12 +57,17 @@ def upload_vcf(vcf_file, vcf_template):
             'filter':{},
             'metadata': dict(vcf.metadata)
         }
+
+        # Store vcf metadata (from header)
         for info in vcf.infos:
             vcf_metadata['info'][info] = {'num':vcf.infos[info].num,'desc':vcf.infos[info].desc}
         for gt_format in vcf.formats:
             vcf_metadata['format'][gt_format] = {'num':vcf.formats[gt_format].num,'desc':vcf.formats[gt_format].desc}
         for filter in vcf.filters:
             vcf_metadata['filter'][filter] = vcf.filters[filter].desc
+
+        # Convert all dot in metadata keys for compatibility with mongodb
+        vcf_metadata = convert_dict_keys(vcf_metadata, dot_to_underscore)
 
         # Parse variant records
         for record in vcf:
@@ -69,7 +77,7 @@ def upload_vcf(vcf_file, vcf_template):
                 if vcf_template['vcf_type'] == 'SNP':
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
                 elif vcf_template['vcf_type'] == 'SV':
-                    variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
+                    variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
 
                 bulk_variants.find({'_id':variant_id}).upsert().update({
                     '$push': {'samples': {'$each': variants_samples[variant_i]}},
@@ -145,6 +153,16 @@ def parse_vcf_record(vcf_record, vcf_metadata, vcf_template):
     return variants, variants_samples
 
 def get_info_fields(record_info, info_fields):
+    """
+    Get info fields from pyvcf record_info
+
+    Args:
+        record_info (pyvcf record infos): info fields from vcf record
+        info_fields (list): info to get from record_info
+
+    Returns:
+        info (dict): Info dictionary containing requested info fields
+    """
     info = {}
     for field in info_fields:
         if field in record_info:
@@ -179,7 +197,9 @@ def adjust_genotype(sample_call, alt_index, allele_symbol = '-'):
                     ref = '0'
             gt_data['GT'] = '{0}/{1}'.format(ref, alt)
 
-        else: # Correct for alt index!
+        elif genotype_field == 'AD':
+            gt_data[genotype_field] = [sample_call[genotype_field][i] for i in [0,alt_index+1]]
+        else: # Correct other (all) entries for alt index!
             gt_data[genotype_field] = sample_call[genotype_field]
 
     return gt_data
@@ -214,6 +234,31 @@ def get_minimal_representation(pos, ref, alt):
             ref = ref[1:]
             pos += 1
         return pos, ref, alt
+
+def convert_dict_keys(obj, convert):
+    """
+    Recursively goes through the dictionary obj and replaces keys with the convert function.
+    Args:
+        obj (dict): dictonary to be converted
+        convert (func): convert function to apply on dictonary keys
+    """
+    if isinstance(obj, (str, int, float)):
+        return obj
+    if isinstance(obj, dict):
+        new = obj.__class__()
+        for k, v in obj.items():
+            new[convert(k)] = convert_dict_keys(v, convert)
+    elif isinstance(obj, (list, set, tuple)):
+        new = obj.__class__(convert_dict_keys(v, convert) for v in obj)
+    else:
+        return obj
+    return new
+
+def dot_to_underscore(string):
+    """
+    Replace every dot with an underscore in a string.
+    """
+    return string.replace('.','_')
 
 # def convert_data(data, metadata):
 #     """
