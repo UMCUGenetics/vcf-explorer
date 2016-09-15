@@ -50,8 +50,9 @@ python vcfexplorer.py resetdb
 ```
 
 # Upload a vcf file
+VCF files are uploaded using a json template. See template folder for example templates.
 ```
-python vcfexplorer.py vcf gatk|delly path/to/file.vcf
+python vcfexplorer.py vcf path/to/vcf_type_template.json path/to/file.vcf
 ```
 
 # Run flask development server
