@@ -51,6 +51,7 @@ def upload_vcf(vcf_file, vcf_template):
             '_id': bson.objectid.ObjectId(),
             'name': vcf_name,
             'vcf_file': vcf_file,
+            'samples': vcf.samples,
             'upload_date' : datetime.now(),
             'info':{},
             'format':{},
