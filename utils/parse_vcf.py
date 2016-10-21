@@ -1,4 +1,4 @@
- -"""
+"""
     parse_vcf.py
 
     Utility functions to upload vcf files
@@ -80,8 +80,6 @@ def upload_vcf(vcf_file, vcf_template):
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
                 elif vcf_template['vcf_type'] == 'SV':
                     if variant['info']['SVTYPE'] in ['DEL','DUP','INV','INS']:
-                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
-                    elif variant['info']['SVTYPE'] == :
                         variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
                     else: #BND
                         variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'],  variant['alt'])

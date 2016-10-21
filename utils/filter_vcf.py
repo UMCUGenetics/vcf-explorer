@@ -30,13 +30,15 @@ def filter_sv_vcf(vcf_file, flank=500):
         #output
         vcf_writer = py_vcf.Writer(sys.stdout, vcf)
 
+        #Filter per record 
         for record in vcf:
             if record.INFO['SVTYPE'] in ['DEL','DUP','INV','INS']:
                 query = {
                     'chr': record.CHROM,
                     'pos': {'$gte': record.POS-flank, '$lte': record.POS+flank},
                     'info.END': {'$gte': record.INFO['END']-flank, '$lte': record.INFO['END']+flank},
-                    'info.SVTYPE': record.INFO['SVTYPE']
+                    'info.SVTYPE': record.INFO['SVTYPE'],
+                    'samples.sample' : {'$nin': vcf.samples}
                 }
                 if db.variants.find_one(query):
                     record.add_filter(db_filter[0])
