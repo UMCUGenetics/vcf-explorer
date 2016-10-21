@@ -1,5 +1,0 @@
-{
-    "vcf_type": "SV",
-    "variant_info_fields": ["SVTYPE","SVLEN","END"],
-    "sample_info_fields": ["CIEND","CIPOS"]
-}

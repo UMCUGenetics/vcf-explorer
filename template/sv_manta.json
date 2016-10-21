@@ -1,0 +1,5 @@
+{
+    "vcf_type": "SV",
+    "variant_info_fields": ["SVTYPE","SVLEN","END"],
+    "sample_info_fields": ["IMPRECISE","CIEND","CIPOS","HOMLEN","HOMSEQ","SVINSLEN","SVINSSEQ","BND_DEPTH","MATE_BND_DEPTH","JUNCTION_QUAL"]
+}
