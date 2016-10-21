@@ -1,4 +1,4 @@
-"""
+ -"""
     parse_vcf.py
 
     Utility functions to upload vcf files
@@ -21,6 +21,7 @@ def upload_vcf(vcf_file, vcf_template):
 
     Args:
         vcf_file (str): Path to vcf file
+        vcf_template (str): Path to json template
     """
     vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
 
@@ -35,7 +36,7 @@ def upload_vcf(vcf_file, vcf_template):
     try:
         f = open(vcf_template, 'r')
     except IOError:
-        print "Can't open vcf template file: {0}".format(vcf_template)
+        sys.exit("Can't open vcf template file: {0}".format(vcf_template))
     else:
         with f:
             vcf_template = json.load(f)
@@ -44,7 +45,7 @@ def upload_vcf(vcf_file, vcf_template):
     try:
         vcf = py_vcf.Reader(open(vcf_file, 'r'))
     except IOError:
-        print "Can't open vcf file: {0}".format(vcf_file)
+        sys.exit("Can't open vcf file: {0}".format(vcf_file))
     else:
         # Setup vcf metadata dictonary, upload to vcfs collection
         vcf_metadata = {
@@ -78,7 +79,12 @@ def upload_vcf(vcf_file, vcf_template):
                 if vcf_template['vcf_type'] == 'SNP':
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
                 elif vcf_template['vcf_type'] == 'SV':
-                    variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
+                    if variant['info']['SVTYPE'] in ['DEL','DUP','INV','INS']:
+                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
+                    elif variant['info']['SVTYPE'] == :
+                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
+                    else: #BND
+                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'],  variant['alt'])
 
                 bulk_variants.find({'_id':variant_id}).upsert().update({
                     '$push': {'samples': {'$each': variants_samples[variant_i]}},

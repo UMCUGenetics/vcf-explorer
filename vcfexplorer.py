@@ -17,6 +17,9 @@ def runserver(args):
 def loadvcf(args):
     utils.parse_vcf.upload_vcf(args.vcf_file, args.vcf_template)
 
+def filtervcf(args):
+    utils.filter_vcf.filter_sv_vcf(args.vcf_file)
+
 def resetdb(args):
     utils.database.resetdb()
 
@@ -34,9 +37,12 @@ if __name__ == "__main__":
 
     # VCF file arguments
     vcf_file = argparse.ArgumentParser(add_help=False)
-    #vcf_file.add_argument('vcf_type', help='VCF type', choices=['gatk', 'delly'])
     vcf_file.add_argument('vcf_template', help='path/to/vcf_type_template.json')
     vcf_file.add_argument('vcf_file', help='path/to/file.vcf')
+
+    # VCF filter arguments
+    vcf_filter = argparse.ArgumentParser(add_help=False)
+    vcf_filter.add_argument('vcf_file', help='path/to/file.vcf')
 
     # Server arguments
     server_port = argparse.ArgumentParser(add_help=False)
@@ -51,12 +57,14 @@ if __name__ == "__main__":
     sp = parser.add_subparsers()
     sp_runserver = sp.add_parser('runserver', parents=[server_port,server_host], help='Run flask development server')
     sp_vcf = sp.add_parser('vcf', parents=[vcf_file] ,help='Upload a vcf file to the database')
+    sp_vcf_filter = sp.add_parser('vcf_filter', parents=[vcf_filter] ,help='Filter a vcf file with the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
     sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
     sp_query = sp.add_parser('query', parents=[query_line], help='Query database')
 
     sp_runserver.set_defaults(func=runserver)
     sp_vcf.set_defaults(func=loadvcf)
+    sp_vcf_filter.set_defaults(func=filtervcf)
     sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
     sp_query.set_defaults(func=query_database)
