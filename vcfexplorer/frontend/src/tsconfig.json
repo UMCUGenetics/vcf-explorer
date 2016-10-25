@@ -37,8 +37,6 @@
     "app/vcf/components/vcfs.component.ts",
     "app/vcf/services/vcf.service.ts",
     "app/vcf/services/vcfs.service.ts",
-    "typings/browser.d.ts",
-    "typings/browser/ambient/es6-shim/index.d.ts",
-    "typings/browser/ambient/jasmine/index.d.ts"
+    "typings/index.d.ts"
   ]
 }
