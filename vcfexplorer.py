@@ -14,11 +14,14 @@ import utils
 def runserver(args):
     app.run(host=args.hostname, port=args.port)
 
-def loadvcf(args):
+def import_vcf(args):
     utils.parse_vcf.upload_vcf(args.vcf_file, args.vcf_template)
 
-def filtervcf(args):
-    utils.filter_vcf.filter_sv_vcf(args.vcf_file)
+def filter_vcf(args):
+    if args.vcf_type == 'sv':
+        utils.filter_vcf.filter_sv_vcf(args.vcf_file)
+    else:
+        print "No filter available"
 
 def resetdb(args):
     utils.database.resetdb()
@@ -36,35 +39,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # VCF file arguments
-    vcf_file = argparse.ArgumentParser(add_help=False)
-    vcf_file.add_argument('vcf_template', help='path/to/vcf_type_template.json')
-    vcf_file.add_argument('vcf_file', help='path/to/file.vcf')
+    import_vcf = argparse.ArgumentParser(add_help=False)
+    import_vcf.add_argument('vcf_template', help='path/to/vcf_type_template.json')
+    import_vcf.add_argument('vcf_file', help='path/to/file.vcf')
 
     # VCF filter arguments
-    vcf_filter = argparse.ArgumentParser(add_help=False)
-    vcf_filter.add_argument('vcf_file', help='path/to/file.vcf')
+    filter_vcf_args = argparse.ArgumentParser(add_help=False)
+    filter_vcf_args.add_argument('vcf_type', choices=['sv','snp'], help='VCF file type')
+    filter_vcf_args.add_argument('vcf_file', help='path/to/file.vcf')
 
     # Server arguments
-    server_port = argparse.ArgumentParser(add_help=False)
-    server_port.add_argument('-p','--port', default=5000, type=int, help='The port of the webserver.')
-    server_host =argparse.ArgumentParser(add_help=False)
-    server_port.add_argument('-host','--hostname', default='localhost', help='The hostname to listen on.')
+    server = argparse.ArgumentParser(add_help=False)
+    server.add_argument('-host','--hostname', default='localhost', help='The hostname to listen on.')
+    server.add_argument('-p','--port', default=5000, type=int, help='The port of the webserver.')
 
     # Query arguments
     query_line = argparse.ArgumentParser(add_help=False)
     query_line.add_argument('query_line', help='Query the database')
 
     sp = parser.add_subparsers()
-    sp_runserver = sp.add_parser('runserver', parents=[server_port,server_host], help='Run flask development server')
-    sp_vcf = sp.add_parser('vcf', parents=[vcf_file] ,help='Upload a vcf file to the database')
-    sp_vcf_filter = sp.add_parser('vcf_filter', parents=[vcf_filter] ,help='Filter a vcf file with the database')
+    sp_runserver = sp.add_parser('runserver', parents=[server], help='Run flask development server')
+    sp_import_vcf = sp.add_parser('import', parents=[import_vcf] ,help='Upload a vcf file to the database')
+    sp_filter_vcf = sp.add_parser('filter', parents=[filter_vcf_args] ,help='Filter a vcf file using the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
     sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
     sp_query = sp.add_parser('query', parents=[query_line], help='Query database')
 
     sp_runserver.set_defaults(func=runserver)
-    sp_vcf.set_defaults(func=loadvcf)
-    sp_vcf_filter.set_defaults(func=filtervcf)
+    sp_import_vcf.set_defaults(func=import_vcf)
+    sp_filter_vcf.set_defaults(func=filter_vcf)
     sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
     sp_query.set_defaults(func=query_database)
