@@ -1,8 +1,10 @@
 
 import pymongo
 
-connection = pymongo.MongoClient("mongodb://localhost")
-db = connection.vcf_explorer
+import config #config.py
+
+connection = pymongo.MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
+db = connection[config.MONGODB_NAME]
 
 import database
 import parse_vcf
