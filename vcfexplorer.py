@@ -32,7 +32,6 @@ def create_indexes(args):
 def query_database(args):
     print "TEST"
     print args.query_line
-    #utils.query.help()
     print utils.query.execute(args.query_line)
 
 if __name__ == "__main__":

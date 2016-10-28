@@ -32,6 +32,7 @@ def filter_sv_vcf(vcf_file, flank=500):
 
         #Filter per record
         for record in vcf:
+            # DEL DUP INV INS filter
             if record.INFO['SVTYPE'] in ['DEL','DUP','INV','INS']:
                 query = {
                     'chr': record.CHROM,
@@ -47,6 +48,17 @@ def filter_sv_vcf(vcf_file, flank=500):
                 if variant:
                     record.add_filter(db_filter[0])
                     vcf_writer.write_record(record)
-                else:
-                    vcf_writer.write_record(record)
-            #else : #BND
+            # BND filter
+            elif record.INFO['SVTYPE'] == "BND":
+                query = {
+                    'alt' : str(record.ALT[0]),
+                    'info.SVTYPE': record.INFO['SVTYPE'],
+                    '$or':[
+                        {'samples.sample' : {'$nin': vcf.samples}},
+                        {'samples.1': {'$exists': True}}
+                    ]
+                }
+                variant = db.variants.find_one(query)
+                if variant:
+                    record.add_filter(db_filter[0])
+                vcf_writer.write_record(record)
