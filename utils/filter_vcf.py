@@ -48,7 +48,9 @@ def filter_sv_vcf(vcf_file, flank=500):
                 if variant:
                     record.add_filter(db_filter[0])
                     vcf_writer.write_record(record)
+
             # BND filter
+            # Change this when bnd is parsed on input
             elif record.INFO['SVTYPE'] == "BND":
                 query = {
                     'alt' : str(record.ALT[0]),
