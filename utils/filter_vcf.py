@@ -52,9 +52,12 @@ def filter_sv_vcf(vcf_file, flank=500):
             # BND filter
             # Change this when bnd is parsed on input
             elif record.INFO['SVTYPE'] == "BND":
+                breakpoint = record.ALT[0]
                 query = {
-                    'alt' : str(record.ALT[0]),
-                    'info.SVTYPE': record.INFO['SVTYPE'],
+                    'chr': record.CHROM,
+                    'pos': {'$gte': record.POS-flank, '$lte': record.POS+flank},
+                    'bnd_info.chr': breakpoint.chr,
+                    'bnd_info.pos': {'$gte': breakpoint.pos-flank, '$lte': breakpoint.pos+flank},
                     '$or':[
                         {'samples.sample' : {'$nin': vcf.samples}},
                         {'samples.1': {'$exists': True}}

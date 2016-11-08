@@ -81,7 +81,18 @@ def upload_vcf(vcf_file, vcf_template):
                 elif vcf_template['vcf_type'] == 'SV':
                     if variant['info']['SVTYPE'] in ['DEL','DUP','INV','INS']:
                         variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
-                    else: #BND
+                    elif variant['info']['SVTYPE'] == 'BND': #BND
+                        # Store breakend information for easy acces instead of via alt field.
+                        # See docs for more info: http://pyvcf.readthedocs.io/en/latest/API.html#vcf-model-singlebreakend
+                        breakpoint = record.ALT[0]
+                        variant['bnd_info'] = {
+                            'chr': breakpoint.chr,
+                            'pos': breakpoint.pos,
+                            'connectingSequence': breakpoint.connectingSequence,
+                            'orientation': breakpoint.orientation,
+                            'remoteOrientation': breakpoint.remoteOrientation,
+                            'withinMainAssembly': breakpoint.withinMainAssembly
+                        }
                         variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'],  variant['alt'])
 
                 bulk_variants.find({'_id':variant_id}).upsert().update({
