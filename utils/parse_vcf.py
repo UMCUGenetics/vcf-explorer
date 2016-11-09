@@ -84,7 +84,7 @@ def upload_vcf(vcf_file, vcf_template):
                     elif variant['info']['SVTYPE'] == 'BND': #BND
                         # Store breakend information for easy access instead of via alt field.
                         # See docs for more info: http://pyvcf.readthedocs.io/en/latest/API.html#vcf-model-singlebreakend
-                        breakpoint = record.ALT[0]
+                        breakpoint = record.ALT[variant_i]
                         variant['bnd_info'] = {
                             'chr': breakpoint.chr,
                             'pos': breakpoint.pos,
