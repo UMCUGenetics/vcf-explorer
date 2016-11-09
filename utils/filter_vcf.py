@@ -45,6 +45,7 @@ def filter_sv_vcf(vcf_file, flank=500):
                     ]
                 }
                 variant = db.variants.find_one(query)
+                # Test speed: db.variants.find(query).limit(1).count(True)
                 if variant:
                     record.add_filter(db_filter[0])
                     vcf_writer.write_record(record)
@@ -64,6 +65,7 @@ def filter_sv_vcf(vcf_file, flank=500):
                     ]
                 }
                 variant = db.variants.find_one(query)
+                # Test speed: db.variants.find(query).limit(1).count(True)
                 if variant:
                     record.add_filter(db_filter[0])
                 vcf_writer.write_record(record)

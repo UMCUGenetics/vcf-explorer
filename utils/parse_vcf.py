@@ -25,7 +25,7 @@ def upload_vcf(vcf_file, vcf_template):
     """
 
     vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
-    if db.vcfs.find({'name':vcf_name}).limit(1).count():
+    if db.vcfs.find({'name':vcf_name}).limit(1).count(True):
         sys.exit("Error: Duplicate vcf name.")
 
     # Setup bulk upload variables
