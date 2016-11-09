@@ -23,14 +23,14 @@ def upload_vcf(vcf_file, vcf_template):
         vcf_file (str): Path to vcf file
         vcf_template (str): Path to json template
     """
+
     vcf_name = vcf_file.split('/')[-1].replace(".vcf","")
+    if db.vcfs.find({'name':vcf_name}).limit(1).count():
+        sys.exit("Error: Duplicate vcf name.")
 
     # Setup bulk upload variables
     variant_count = 0
     bulk_variants = db.variants.initialize_unordered_bulk_op()
-
-    if db.vcfs.find({'name':vcf_name}).limit(1).count() > 0:
-        sys.exit("Error: Duplicate vcf name.")
 
     #Open vcf template file
     try:
@@ -76,13 +76,13 @@ def upload_vcf(vcf_file, vcf_template):
             variants, variants_samples = parse_vcf_record(record, vcf_metadata, vcf_template)
             for variant_i, variant in enumerate(variants):
                 #Setup variant id based on vcf_type
-                if vcf_template['vcf_type'] == 'SNP':
+                if record.is_snp or record.is_indel:
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
-                elif vcf_template['vcf_type'] == 'SV':
+                elif record.is_sv:
                     if variant['info']['SVTYPE'] in ['DEL','DUP','INV','INS']:
                         variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
                     elif variant['info']['SVTYPE'] == 'BND': #BND
-                        # Store breakend information for easy acces instead of via alt field.
+                        # Store breakend information for easy access instead of via alt field.
                         # See docs for more info: http://pyvcf.readthedocs.io/en/latest/API.html#vcf-model-singlebreakend
                         breakpoint = record.ALT[0]
                         variant['bnd_info'] = {
@@ -136,7 +136,6 @@ def parse_vcf_record(vcf_record, vcf_metadata, vcf_template):
     # https://github.com/samtools/hts-specs/issues/77
     for alt_index, alt_allele in enumerate(vcf_record.ALT):
         pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
-        #print vcf_template['variant_info_fields']
         variant = {
             'chr': vcf_record.CHROM,
             'pos' : pos,
