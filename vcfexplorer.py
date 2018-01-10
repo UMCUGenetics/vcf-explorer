@@ -44,7 +44,7 @@ if __name__ == "__main__":
     filter_vcf_args.add_argument('-f','--flank', default=10, type=int, help='Flank to increase filter search space [10]')
     filter_vcf_args.add_argument('-n','--name', default='DB', type=str, help='Filter name [DB]')
     filter_vcf_args.add_argument('-q','--query', default='', type=str, help='Filter query')
-    filter_vcf_args.add_argument('-o','--ori', action='store_true')
+    filter_vcf_args.add_argument('-o','--ori', action='store_true', help='Including orientation')
 
     # Server arguments
     server = argparse.ArgumentParser(add_help=False)

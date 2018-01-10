@@ -141,7 +141,7 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 			if 'END' in vcf_record.INFO:
 				end = vcf_record.INFO['END']
 			else:
-				end = False
+				sys.exit("Cannot find 'END' in info field")
 		if vcf_record.CHROM == chr2:
 			svlen = end-pos
 		else:
@@ -149,7 +149,7 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 		if 'SVTYPE' in vcf_record.INFO:
 			svtype = vcf_record.INFO['SVTYPE']
 		else:
-			svtype = False
+			sys.exit("Cannot find 'SVTYPE' in info field")
 		if svtype == 'DEL':
 			orientation = False
 			remoteOrientation = True
@@ -160,8 +160,7 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 			orientation = True
 			remoteOrientation = False
 		elif svtype != 'BND':
-			orientation = 'UNKNOWN'
-			remoteOrientation = 'UNKNOWN'
+			sys.exit("Cannot convert orientation and remoteOrientation")
 		
 		variant = {
 		'chr' : vcf_record.CHROM,
