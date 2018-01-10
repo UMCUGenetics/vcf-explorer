@@ -10,7 +10,6 @@ import pymongo
 
 from . import connection, db
 
-
 def create_sample_query( query_command ):
 	match = re.match(r"^SAMPLE(=|\!=|\?=)\[?(.+)\]?",query_command)
 	query = {}  
@@ -21,15 +20,15 @@ def create_sample_query( query_command ):
 	# Create must query
 	if match.group(1) == "=":
 		
-		## Variant may not occur in all other samples in the database
+		## Variant may not be present in all other samples in the database
 		query['samples'] = { '$elemMatch': { 'sample': { '$nin': sample_list} } }
 	
-		## Variant 'must' be present in the given sample(s), otherwise it get the filter NotPresent
+		## Check if the Variant is be present in the given sample(s), otherwise it get the filter NotPresent
 		query_2['samples.sample'] = { '$in': sample_list }
 		
 	# Create may query
 	elif match.group(1) == "?=":
-		## Variant may only occur in the given sample(s)
+		## Variant may only be present in the given sample(s)
 		query['samples'] = { '$elemMatch': { 'sample': { '$nin': sample_list} } }
 	
 	# Create against query

@@ -32,15 +32,6 @@ def upload_vcf(vcf_file):
     variant_count = 0
     bulk_variants = db.variants.initialize_unordered_bulk_op()
 
-    #Open vcf template file
-    #try:
-        #f = open(vcf_template, 'r')
-    #except IOError:
-        #sys.exit("Can't open vcf template file: {0}".format(vcf_template))
-    #else:
-        #with f:
-            #vcf_template = json.load(f)
-
     #Open vcf file
     try:
         vcf = py_vcf.Reader(open(vcf_file, 'r'))
@@ -199,13 +190,13 @@ def parse_vcf_record(vcf_record, vcf_metadata):
                     sample_var['vcf_id'] = vcf_metadata['_id']
                     sample_var['info'] = vcf_record.INFO
                     if 'CIPOS' in vcf_record.INFO:
-			    sample_var['info']['POS'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
+			    sample_var['info']['POS_RANGE'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
 		    else:
-			    sample_var['info']['POS'] = [ pos, pos ]
+			    sample_var['info']['POS_RANGE'] = [ pos, pos ]
                     if 'CIEND' in vcf_record.INFO:
-			    sample_var['info']['END'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
+			    sample_var['info']['END_RANGE'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
 		    else:
-			    sample_var['info']['END'] = [ end, pos ]
+			    sample_var['info']['END_RANGE'] = [ end, pos ]
 
                     # Set filter field
                     if vcf_record.FILTER:
