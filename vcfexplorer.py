@@ -15,38 +15,36 @@ def runserver(args):
     app.run(host=args.hostname, port=args.port)
 
 def upload_vcf(args):
-    utils.parse_vcf.upload_vcf(args.vcf_file, args.vcf_template)
+    utils.parse_vcf.upload_vcf(args.vcf_file)
 
 def filter_vcf(args):
-    if args.vcf_type == 'sv':
-        utils.filter_vcf.filter_sv_vcf(args.vcf_file, args.flank)
-    else:
-        print "No filter available"
-
+    utils.filter_vcf.filter_sv_vcf(args.vcf_file, args.flank, args.name, args.query, args.ori)
+    
 def resetdb(args):
     utils.database.resetdb()
 
 def create_indexes(args):
     utils.database.create_indexes()
 
-def query_database(args):
-    print "TEST"
-    print args.query_line
-    print utils.query.execute(args.query_line)
+#def query_database(args):
+    #print "TEST"
+    #print args.query_line
+    #print utils.query.execute(args.query_line)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # VCF file arguments
     import_vcf = argparse.ArgumentParser(add_help=False)
-    import_vcf.add_argument('vcf_template', help='path/to/vcf_type_template.json')
     import_vcf.add_argument('vcf_file', help='path/to/file.vcf')
 
     # VCF filter arguments
     filter_vcf_args = argparse.ArgumentParser(add_help=False)
-    filter_vcf_args.add_argument('vcf_type', choices=['sv','snp'], help='VCF file type')
     filter_vcf_args.add_argument('vcf_file', help='path/to/file.vcf')
-    filter_vcf_args.add_argument('-f','--flank', default=500, type=int, help='Flank to increase filter search space [500]')
+    filter_vcf_args.add_argument('-f','--flank', default=10, type=int, help='Flank to increase filter search space [10]')
+    filter_vcf_args.add_argument('-n','--name', default='DB', type=str, help='Filter name [DB]')
+    filter_vcf_args.add_argument('-q','--query', default='', type=str, help='Filter query')
+    filter_vcf_args.add_argument('-o','--ori', action='store_true')
 
     # Server arguments
     server = argparse.ArgumentParser(add_help=False)
@@ -63,14 +61,14 @@ if __name__ == "__main__":
     sp_filter_vcf = sp.add_parser('filter', parents=[filter_vcf_args] ,help='Filter a vcf file using the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
     sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
-    sp_query = sp.add_parser('query', parents=[query_line], help='Query database')
+    #sp_query = sp.add_parser('query', parents=[query_line], help='Query database')
 
     sp_runserver.set_defaults(func=runserver)
     sp_import_vcf.set_defaults(func=upload_vcf)
     sp_filter_vcf.set_defaults(func=filter_vcf)
     sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
-    sp_query.set_defaults(func=query_database)
+    #sp_query.set_defaults(func=query_database)
 
     args = parser.parse_args()
     args.func(args)

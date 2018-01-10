@@ -15,7 +15,7 @@ import json
 from . import connection, db
 from helper import deep_update
 
-def upload_vcf(vcf_file, vcf_template):
+def upload_vcf(vcf_file):
     """
     Parse vcf files and upload variants using bulk functionality of mongodb.
 
@@ -33,13 +33,13 @@ def upload_vcf(vcf_file, vcf_template):
     bulk_variants = db.variants.initialize_unordered_bulk_op()
 
     #Open vcf template file
-    try:
-        f = open(vcf_template, 'r')
-    except IOError:
-        sys.exit("Can't open vcf template file: {0}".format(vcf_template))
-    else:
-        with f:
-            vcf_template = json.load(f)
+    #try:
+        #f = open(vcf_template, 'r')
+    #except IOError:
+        #sys.exit("Can't open vcf template file: {0}".format(vcf_template))
+    #else:
+        #with f:
+            #vcf_template = json.load(f)
 
     #Open vcf file
     try:
@@ -73,32 +73,19 @@ def upload_vcf(vcf_file, vcf_template):
 
         # Parse variant records
         for record in vcf:
-            variants, variants_samples = parse_vcf_record(record, vcf_metadata, vcf_template)
+            variants, variants_samples = parse_vcf_record(record, vcf_metadata)
             for variant_i, variant in enumerate(variants):
                 #Setup variant id based on vcf_type
                 if record.is_snp or record.is_indel:
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
                 elif record.is_sv:
-                    if variant['info']['SVTYPE'] in ['DEL','DUP','INV','INS']:
-                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'], variant['info']['END'])
-                    elif variant['info']['SVTYPE'] == 'BND': #BND
-                        # Store breakend information for easy access instead of via alt field.
-                        # See docs for more info: http://pyvcf.readthedocs.io/en/latest/API.html#vcf-model-singlebreakend
-                        breakpoint = record.ALT[variant_i]
-                        variant['bnd_info'] = {
-                            'chr': breakpoint.chr,
-                            'pos': breakpoint.pos,
-                            'connectingSequence': breakpoint.connectingSequence,
-                            'orientation': breakpoint.orientation,
-                            'remoteOrientation': breakpoint.remoteOrientation,
-                            'withinMainAssembly': breakpoint.withinMainAssembly
-                        }
-                        variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['info']['SVTYPE'],  variant['alt'])
+		    variant_id = '{}-{}-{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['chr2'], variant['end'], variant['orientation'], variant['remoteOrientation'])
 
-                bulk_variants.find({'_id':variant_id}).upsert().update({
-                    '$push': {'samples': {'$each': variants_samples[variant_i]}},
-                    '$set': variant,
-                    }
+		if variants_samples[variant_i]:
+			bulk_variants.find({'_id':variant_id}).upsert().update({
+			'$push': {'samples': {'$each': variants_samples[variant_i]}},
+			'$set': variant,
+			}			
                 )
             variant_count += len(variants)
 
@@ -112,7 +99,7 @@ def upload_vcf(vcf_file, vcf_template):
         bulk_variants.execute()
         db.vcfs.insert_one(vcf_metadata)
 
-def parse_vcf_record(vcf_record, vcf_metadata, vcf_template):
+def parse_vcf_record(vcf_record, vcf_metadata):
     """
     Parse vcf variant record.
     VCF variants records containing multiple alternative alleles are splitted by alternative allele and
@@ -136,14 +123,59 @@ def parse_vcf_record(vcf_record, vcf_metadata, vcf_template):
     # https://github.com/samtools/hts-specs/issues/77
     for alt_index, alt_allele in enumerate(vcf_record.ALT):
         pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
-        variant = {
-            'chr': vcf_record.CHROM,
-            'pos' : pos,
-            'ref' : ref,
-            'alt' : alt,
-            'info' : get_info_fields(vcf_record.INFO, vcf_template['variant_info_fields'])
-        }
-        variants.append(variant)
+        if vcf_record.is_sv:
+		
+		# If sv is a breakend
+		if ( isinstance(vcf_record.ALT[0], py_vcf.model._Breakend) ) :
+			breakpoint = vcf_record.ALT[alt_index]
+			chr2 = breakpoint.chr
+			end = breakpoint.pos
+			alt = breakpoint.connectingSequence
+			orientation = breakpoint.orientation
+                        remoteOrientation = breakpoint.remoteOrientation
+		else:
+			if 'CHR2' in vcf_record.INFO:
+				chr2 = vcf_record.INFO['CHR2']
+			else:
+				chr2 = vcf_record.CHROM
+			if 'END' in vcf_record.INFO:
+				end = vcf_record.INFO['END']
+			else:
+				end = False
+		if vcf_record.CHROM == chr2:
+			svlen = end-pos
+		else:
+			svlen = False
+		if 'SVTYPE' in vcf_record.INFO:
+			svtype = vcf_record.INFO['SVTYPE']
+		else:
+			svtype = False
+		if svtype == 'DEL':
+			orientation = False
+			remoteOrientation = True
+		elif svtype == 'INS':
+			orientation = False
+			remoteOrientation = True
+		elif svtype == 'DUP':
+			orientation = True
+			remoteOrientation = False
+		elif svtype != 'BND':
+			orientation = 'UNKNOWN'
+			remoteOrientation = 'UNKNOWN'
+		
+		variant = {
+		'chr' : vcf_record.CHROM,
+		'pos' : pos,
+		'ref' : ref,
+		'alt' : alt,            
+		'chr2' : chr2,
+		'end' : end,
+		'svlen' : svlen,
+		'svtype' : svtype,
+		'orientation' : orientation,
+		'remoteOrientation': remoteOrientation,
+		}
+		variants.append(variant)
 
         # Parse samples
         variant_samples = []
@@ -156,7 +188,15 @@ def parse_vcf_record(vcf_record, vcf_metadata, vcf_template):
                     sample_var['genotype'] = sample_gt_data
                     sample_var['sample'] = sample_call.sample
                     sample_var['vcf_id'] = vcf_metadata['_id']
-                    sample_var['info'] = get_info_fields(vcf_record.INFO, vcf_template['sample_info_fields'])
+                    sample_var['info'] = vcf_record.INFO
+                    if 'CIPOS' in vcf_record.INFO:
+			    sample_var['info']['POS'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
+		    else:
+			    sample_var['info']['POS'] = [ pos, pos ]
+                    if 'CIEND' in vcf_record.INFO:
+			    sample_var['info']['END'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
+		    else:
+			    sample_var['info']['END'] = [ end, pos ]
 
                     # Set filter field
                     if vcf_record.FILTER:
