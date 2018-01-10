@@ -24,18 +24,17 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
         # setup filter
         db_filter = py_vcf.parser._Filter(filter_name, 'Similar variant found in database with {0}bp flank'.format(flank))
         vcf.filters[db_filter[0]] = db_filter
-        notpresent_filter = py_vcf.parser._Filter("NotPresent", 'Similar variant is not found in the given sample(s)')
-        vcf.filters[notpresent_filter[0]] = notpresent_filter
+        presence_filter = py_vcf.parser._Filter("NotPresent", 'Similar variant is not found in the given sample(s)')
+        vcf.filters[presence_filter[0]] = presence_filter
         
         vcf.infos['DB_Count'] = py_vcf.parser._Info('DB_Count', 1, 'Int', 'Variant count in database', 'vcf_explorer', '0.1')
         vcf.infos['DB_Frequency'] = py_vcf.parser._Info('DB_Frequency', 1, 'Float', 'Variant frequency in database', 'vcf_explorer', '0.1')
         if filter_query:
-		query_filter = py_vcf.parser._Filter("DBQUERY", filter_query)
 		sample_match_query = re.match(r"^SAMPLE(=|\!=|\?=)\[?(\S+)\]?", filter_query)
 		if sample_match_query:
-			my_sample_query = query.create_sample_query( filter_query )
+			my_sample_query, my_sample_query_2 = query.create_sample_query( filter_query )
 	
-        # output
+	# output
         vcf_writer = py_vcf.Writer(sys.stdout, vcf)
 
         # Count number of samples in db for frequency
@@ -118,19 +117,15 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
 			query_aggregate[0]['$match']['remoteOrientation'] = remoteOrientation
 		
 		if filter_query:
-			# If query is sample must
-			if '$and' in my_sample_query and '$or' in my_sample_query:
-				query_aggregate2 = list(query_aggregate)
-				query_aggregate2[0]['$match'] = { '$and': [ query_aggregate2[0]['$match'], { '$and': my_sample_query['$and'] } ] }
-				variant_aggregate2 = list(db.variants.aggregate(query_aggregate2))
-				if not variant_aggregate2:
-					record.add_filter(notpresent_filter[0])
-				
-				query_aggregate[0]['$match'] = { '$and': [ query_aggregate[0]['$match'], { '$or': my_sample_query['$or'] } ] }			
-				
-			else:
-				query_aggregate[0]['$match'] = { '$and': [ query_aggregate[0]['$match'], my_sample_query ] }
-				
+			if my_sample_query_2:
+				query_aggregate_presence = list( query_aggregate )
+				query_aggregate_presence[0]['$match'] = { '$and': [ query_aggregate_presence[0]['$match'], my_sample_query_2 ] }
+				variant_aggregate_presence = list(db.variants.aggregate(query_aggregate_presence))
+				if not variant_aggregate_presence:
+					record.add_filter( presence_filter[0] )
+			query_aggregate[0]['$match'] = { '$and': [ query_aggregate[0]['$match'], my_sample_query ] }
+			
+		
 		variant_aggregate = list(db.variants.aggregate(query_aggregate))
                 
 		db_count = 0
@@ -139,7 +134,9 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
                     record.add_filter(db_filter[0])
                     db_count = variant_aggregate[0]['samples_with_variant']
                     db_frequency = float(variant_aggregate[0]['samples_with_variant']) / sampels_in_db
-
+		
+		
+		
                 record.add_info('DB_Count', db_count)
                 record.add_info('DB_Frequency', db_frequency)
                 vcf_writer.write_record(record)

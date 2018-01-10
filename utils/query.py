@@ -14,29 +14,30 @@ from . import connection, db
 def create_sample_query( query_command ):
 	match = re.match(r"^SAMPLE(=|\!=|\?=)\[?(.+)\]?",query_command)
 	query = {}  
+	query_2 = {}
 	if match:
 		sample_list = match.group(2).split(',')
 	
 	# Create must query
 	if match.group(1) == "=":
-		query['$or'] = [ 
-			{ 'samples': { '$size': len(sample_list) } }, 
-			{ 'samples.sample': { '$not': { '$all': sample_list } }}
-		]
-		query['$and'] = [
-			{ 'samples': { '$size': len(sample_list) } }, 
-			{ 'samples.sample': { '$all': sample_list } }
-		]
+		
+		## Variant may not occur in all other samples in the database
+		query['samples'] = { '$elemMatch': { 'sample': { '$nin': sample_list} } }
+	
+		## Variant 'must' be present in the given sample(s), otherwise it get the filter NotPresent
+		query_2['samples.sample'] = { '$in': sample_list }
 		
 	# Create may query
 	elif match.group(1) == "?=":
+		## Variant may only occur in the given sample(s)
 		query['samples'] = { '$elemMatch': { 'sample': { '$nin': sample_list} } }
 	
 	# Create against query
 	elif match.group(1) == "!=":
+		## Filter variant only when its present in the given sample(s)
 		query['samples.sample'] = { '$in': sample_list }
 
-	return query
+	return query, query_2
 
 
 

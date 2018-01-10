@@ -73,6 +73,7 @@ def upload_vcf(vcf_file):
 
         # Parse variant records
         for record in vcf:
+	    print( record )
             variants, variants_samples = parse_vcf_record(record, vcf_metadata)
             for variant_i, variant in enumerate(variants):
                 #Setup variant id based on vcf_type
@@ -159,6 +160,15 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 		elif svtype == 'DUP':
 			orientation = True
 			remoteOrientation = False
+		elif svtype == 'INV':
+			if 'INV5' in vcf_record.INFO:
+				orientation = True
+				remoteOrientation = True
+			elif 'INV3' in vcf_record.INFO:
+				orientation = False
+				remoteOrientation = False
+			else:
+				sys.exit("Unknown inversion orientation")
 		elif svtype != 'BND':
 			sys.exit("Cannot convert orientation and remoteOrientation")
 		
