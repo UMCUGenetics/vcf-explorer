@@ -6,7 +6,7 @@ import re
 
 from . import db
 from . import query
-
+from . import parse_vcf
 
 def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filter_ori=False):
     """
@@ -44,47 +44,12 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
             {'$count': 'samples_in_db'}
         ]
 		
-        #sampels_in_db = len(db.vcfs.distinct('samples', my_sample_query.replace('this.samples','this')))
         sampels_in_db = len(db.vcfs.distinct('samples'))
         
 	for record in vcf:
-		pos, ref, alt = get_minimal_representation(record.POS, str(record.REF), str(record.ALT))
-		if ( isinstance(record.ALT[0], py_vcf.model._Breakend) ) :
-			breakpoint = record.ALT[0]
-			chr2 = breakpoint.chr
-			end = breakpoint.pos
-			alt = breakpoint.connectingSequence
-			orientation = breakpoint.orientation
-                        remoteOrientation = breakpoint.remoteOrientation
-		else:
-			if 'CHR2' in record.INFO:
-				chr2 = record.INFO['CHR2']
-			else:
-				chr2 = record.CHROM
-			if 'END' in record.INFO:
-				end = record.INFO['END']
-			else:
-				end = False
-		if record.CHROM == chr2:
-			svlen = end-pos
-		else:
-			svlen = False
-		if 'SVTYPE' in record.INFO:
-			svtype = record.INFO['SVTYPE']
-		else:
-			svtype = False
-		if svtype == 'DEL':
-			orientation = False
-			remoteOrientation = True
-		elif svtype == 'INS':
-			orientation = False
-			remoteOrientation = True
-		elif svtype == 'DUP':
-			orientation = True
-			remoteOrientation = False
-		elif svtype != 'BND':
-			orientation = 'UNKNOWN'
-			remoteOrientation = 'UNKNOWN'
+		if record.is_sv:
+			chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_vcf.parse_sv_record( record, 0, record.ALT )
+		
 		if 'CIPOS' in record.INFO:
 			pos1, pos2 = pos+record.INFO['CIPOS'][0], pos+record.INFO['CIPOS'][1]
 		else:
@@ -99,9 +64,9 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
 		
 		query_aggregate = [
                     {'$match': {
-                        'chr': record.CHROM,
+                        'chr': chr,
                         'chr2': chr2,
-                        'samples': { '$elemMatch': { 'info.POS': { '$elemMatch': { '$gte': pos1, '$lte': pos2} }, 'info.END': { '$elemMatch': { '$gte': end1, '$lte': end2} } } },
+                        'samples': { '$elemMatch': { 'info.POS_RANGE': { '$elemMatch': { '$gte': pos1, '$lte': pos2} }, 'info.END_RANGE': { '$elemMatch': { '$gte': end1, '$lte': end2} } } },
 			'$or': [
                             {'samples.sample': {'$nin': vcf.samples}},
                             {'samples.1': {'$exists': 'true'}}
@@ -116,6 +81,7 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
 			query_aggregate[0]['$match']['orientation'] = orientation
 			query_aggregate[0]['$match']['remoteOrientation'] = remoteOrientation
 		
+		# Add sample query filter
 		if filter_query:
 			if my_sample_query_2:
 				query_aggregate_presence = list( query_aggregate )
@@ -125,7 +91,6 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
 					record.add_filter( presence_filter[0] )
 			query_aggregate[0]['$match'] = { '$and': [ query_aggregate[0]['$match'], my_sample_query ] }
 			
-		
 		variant_aggregate = list(db.variants.aggregate(query_aggregate))
                 
 		db_count = 0

@@ -64,7 +64,6 @@ def upload_vcf(vcf_file):
 
         # Parse variant records
         for record in vcf:
-	    print( record )
             variants, variants_samples = parse_vcf_record(record, vcf_metadata)
             for variant_i, variant in enumerate(variants):
                 #Setup variant id based on vcf_type
@@ -114,57 +113,10 @@ def parse_vcf_record(vcf_record, vcf_metadata):
     # 1/2 variants are splitted into two variants with genotype: 1/-
     # https://github.com/samtools/hts-specs/issues/77
     for alt_index, alt_allele in enumerate(vcf_record.ALT):
-        pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
         if vcf_record.is_sv:
-		
-		# If sv is a breakend
-		if ( isinstance(vcf_record.ALT[0], py_vcf.model._Breakend) ) :
-			breakpoint = vcf_record.ALT[alt_index]
-			chr2 = breakpoint.chr
-			end = breakpoint.pos
-			alt = breakpoint.connectingSequence
-			orientation = breakpoint.orientation
-                        remoteOrientation = breakpoint.remoteOrientation
-		else:
-			if 'CHR2' in vcf_record.INFO:
-				chr2 = vcf_record.INFO['CHR2']
-			else:
-				chr2 = vcf_record.CHROM
-			if 'END' in vcf_record.INFO:
-				end = vcf_record.INFO['END']
-			else:
-				sys.exit("Cannot find 'END' in info field")
-		if vcf_record.CHROM == chr2:
-			svlen = end-pos
-		else:
-			svlen = False
-		if 'SVTYPE' in vcf_record.INFO:
-			svtype = vcf_record.INFO['SVTYPE']
-		else:
-			sys.exit("Cannot find 'SVTYPE' in info field")
-		if svtype == 'DEL':
-			orientation = False
-			remoteOrientation = True
-		elif svtype == 'INS':
-			orientation = False
-			remoteOrientation = True
-		elif svtype == 'DUP':
-			orientation = True
-			remoteOrientation = False
-		elif svtype == 'INV':
-			if 'INV5' in vcf_record.INFO:
-				orientation = True
-				remoteOrientation = True
-			elif 'INV3' in vcf_record.INFO:
-				orientation = False
-				remoteOrientation = False
-			else:
-				sys.exit("Unknown inversion orientation")
-		elif svtype != 'BND':
-			sys.exit("Cannot convert orientation and remoteOrientation")
-		
+		chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_sv_record( vcf_record, alt_index, alt_allele )
 		variant = {
-		'chr' : vcf_record.CHROM,
+		'chr' : chr,
 		'pos' : pos,
 		'ref' : ref,
 		'alt' : alt,            
@@ -206,6 +158,60 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 
         variants_samples.append(variant_samples)
     return variants, variants_samples
+
+def parse_sv_record( vcf_record, alt_index, alt_allele ):
+
+	pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
+        chr = vcf_record.CHROM
+        
+	# If sv is a breakend
+	if ( isinstance(vcf_record.ALT[0], py_vcf.model._Breakend) ) :
+		breakpoint = vcf_record.ALT[alt_index]
+		chr2 = breakpoint.chr
+		end = breakpoint.pos
+		alt = breakpoint.connectingSequence
+		orientation = breakpoint.orientation
+		remoteOrientation = breakpoint.remoteOrientation
+	else:
+		if 'CHR2' in vcf_record.INFO:
+			chr2 = vcf_record.INFO['CHR2']
+		else:
+			chr2 = vcf_record.CHROM
+		if 'END' in vcf_record.INFO:
+			end = vcf_record.INFO['END']
+		else:
+			sys.exit("Cannot find 'END' in info field")
+	if vcf_record.CHROM == chr2:
+		svlen = end-pos
+	else:
+		svlen = False
+	if 'SVTYPE' in vcf_record.INFO:
+		svtype = vcf_record.INFO['SVTYPE']
+	else:
+		sys.exit("Cannot find 'SVTYPE' in info field")
+	if svtype == 'DEL':
+		orientation = False
+		remoteOrientation = True
+	elif svtype == 'INS':
+		orientation = False
+		remoteOrientation = True
+	elif svtype == 'DUP':
+		orientation = True
+		remoteOrientation = False
+	elif svtype == 'INV':
+		if 'INV5' in vcf_record.INFO:
+			orientation = True
+			remoteOrientation = True
+		elif 'INV3' in vcf_record.INFO:
+			orientation = False
+			remoteOrientation = False
+		else:
+			sys.exit("Unknown inversion orientation")
+	elif svtype != 'BND':
+		sys.exit("Cannot convert orientation and remoteOrientation")
+	
+	return chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation
+
 
 def get_info_fields(record_info, info_fields):
     """
