@@ -73,9 +73,10 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
                         ]
                     }},
                     {'$unwind': '$samples'},
+                    {'$group': { '_id': '$samples.sample' } },
                     {'$count': 'samples_with_variant'}
                 ]
-
+			
 		# Add orientation filter
 		if filter_ori:
 			query_aggregate[0]['$match']['orientation'] = orientation
