@@ -8,7 +8,7 @@ from . import db
 from . import query
 from . import parse_vcf
 
-def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filter_ori=False):
+def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filter_ori=False, filter_count=2):
     """
     Parse vcf files and filter on database.
 
@@ -22,12 +22,12 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
         sys.exit("Can't open vcf file: {0}".format(vcf_file))
     else:
         # setup filter
-        db_filter = py_vcf.parser._Filter(filter_name, 'Similar variant found in database with {0}bp flank'.format(flank))
+        db_filter = py_vcf.parser._Filter(filter_name, 'Similar variant found {0} times in database with {1}bp flank'.format(filter_count,flank))
         vcf.filters[db_filter[0]] = db_filter
         presence_filter = py_vcf.parser._Filter("NotPresent", 'Similar variant is not found in the given sample(s)')
         vcf.filters[presence_filter[0]] = presence_filter
         
-        vcf.infos['DB_Count'] = py_vcf.parser._Info('DB_Count', 1, 'Int', 'Variant count in database', 'vcf_explorer', '0.1')
+        vcf.infos['DB_Count'] = py_vcf.parser._Info('DB_Count', 1, 'Integer', 'Variant count in database', 'vcf_explorer', '0.1')
         vcf.infos['DB_Frequency'] = py_vcf.parser._Info('DB_Frequency', 1, 'Float', 'Variant frequency in database', 'vcf_explorer', '0.1')
         if filter_query:
 		sample_match_query = re.match(r"^SAMPLE(=|\!=|\?=)\[?(\S+)\]?", filter_query)
@@ -97,10 +97,11 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
 		db_count = 0
                 db_frequency = 0.0
                 if variant_aggregate:
-                    record.add_filter(db_filter[0])
                     db_count = variant_aggregate[0]['samples_with_variant']
                     db_frequency = float(variant_aggregate[0]['samples_with_variant']) / sampels_in_db
-		
+                    if db_count >= filter_count:
+			record.add_filter(db_filter[0])
+                    
 		
 		
                 record.add_info('DB_Count', db_count)

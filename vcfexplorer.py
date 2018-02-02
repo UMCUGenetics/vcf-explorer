@@ -18,7 +18,7 @@ def upload_vcf(args):
     utils.parse_vcf.upload_vcf(args.vcf_file)
 
 def filter_vcf(args):
-    utils.filter_vcf.filter_sv_vcf(args.vcf_file, args.flank, args.name, args.query, args.ori)
+    utils.filter_vcf.filter_sv_vcf(args.vcf_file, args.flank, args.name, args.query, args.ori, args.count)
     
 def resetdb(args):
     utils.database.resetdb()
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     filter_vcf_args.add_argument('-n','--name', default='DB', type=str, help='Filter name [DB]')
     filter_vcf_args.add_argument('-q','--query', default='', type=str, help='Filter query')
     filter_vcf_args.add_argument('-o','--ori', action='store_true', help='Including orientation')
+    filter_vcf_args.add_argument('-c','--count', default=1, type=int, help='Minimum number of hits in the database, before adding the filter flag [1]')
 
     # Server arguments
     server = argparse.ArgumentParser(add_help=False)
