@@ -12,10 +12,12 @@ from . import connection, db
 
 def create_sample_query( query_command ):
 	match = re.match(r"^SAMPLE(=|\!=|\?=)\[?(.+)\]?",query_command)
+	
 	query = {}  
 	query_2 = {}
 	if match:
 		sample_list = match.group(2).split(',')
+		sample_list[-1] = sample_list[-1].replace("]","")
 	
 	# Create must query
 	if match.group(1) == "=":
