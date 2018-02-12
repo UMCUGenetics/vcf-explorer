@@ -26,11 +26,6 @@ def resetdb(args):
 def create_indexes(args):
     utils.database.create_indexes()
 
-#def query_database(args):
-    #print "TEST"
-    #print args.query_line
-    #print utils.query.execute(args.query_line)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -62,14 +57,12 @@ if __name__ == "__main__":
     sp_filter_vcf = sp.add_parser('filter', parents=[filter_vcf_args] ,help='Filter a vcf file using the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
     sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
-    #sp_query = sp.add_parser('query', parents=[query_line], help='Query database')
 
     sp_runserver.set_defaults(func=runserver)
     sp_import_vcf.set_defaults(func=upload_vcf)
     sp_filter_vcf.set_defaults(func=filter_vcf)
     sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
-    #sp_query.set_defaults(func=query_database)
 
     args = parser.parse_args()
     args.func(args)
