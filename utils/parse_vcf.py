@@ -70,7 +70,7 @@ def upload_vcf(vcf_file):
                 if record.is_snp or record.is_indel:
                     variant_id = '{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['ref'], variant['alt'])
                 elif record.is_sv:
-            variant_id = '{}-{}-{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['chr2'], variant['end'], variant['orientation'], variant['remoteOrientation'])
+                    variant_id = '{}-{}-{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['chr2'], variant['end'], variant['orientation'], variant['remoteOrientation'])
 
         if variants_samples[variant_i]:
             bulk_variants.find({'_id':variant_id}).upsert().update({
@@ -114,7 +114,7 @@ def parse_vcf_record(vcf_record, vcf_metadata):
     # https://github.com/samtools/hts-specs/issues/77
     for alt_index, alt_allele in enumerate(vcf_record.ALT):
         if vcf_record.is_sv:
-        chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_sv_record( vcf_record, alt_index, alt_allele )
+            chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_sv_record( vcf_record, alt_index, alt_allele )
         variant = {
         'chr' : chr,
         'pos' : pos,
@@ -142,19 +142,20 @@ def parse_vcf_record(vcf_record, vcf_metadata):
                     sample_var['vcf_id'] = vcf_metadata['_id']
                     sample_var['info'] = vcf_record.INFO
                     if 'CIPOS' in vcf_record.INFO:
-                sample_var['info']['POS_RANGE'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
+                        sample_var['info']['POS_RANGE'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
             else:
                 sample_var['info']['POS_RANGE'] = [ pos, pos ]
-                    if 'CIEND' in vcf_record.INFO:
+            
+            if 'CIEND' in vcf_record.INFO:
                 sample_var['info']['END_RANGE'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
             else:
                 sample_var['info']['END_RANGE'] = [ end, pos ]
 
-                    # Set filter field
-                    if vcf_record.FILTER:
-                        sample_var['filter'] = vcf_record.FILTER
+            # Set filter field
+            if vcf_record.FILTER:
+                sample_var['filter'] = vcf_record.FILTER
 
-                    variant_samples.append(sample_var)
+            variant_samples.append(sample_var)
 
         variants_samples.append(variant_samples)
     return variants, variants_samples
@@ -162,7 +163,7 @@ def parse_vcf_record(vcf_record, vcf_metadata):
 def parse_sv_record( vcf_record, alt_index, alt_allele ):
 
     pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
-        chr = vcf_record.CHROM
+    chr = vcf_record.CHROM
         
     # If sv is a breakend
     if ( isinstance(vcf_record.ALT[0], py_vcf.model._Breakend) ) :

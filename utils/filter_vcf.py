@@ -65,7 +65,8 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
             pos1, pos2 = pos+record.INFO['CIPOS'][0], pos+record.INFO['CIPOS'][1]
         else:
             pos1, pos2 = pos, pos
-                if 'CIEND' in record.INFO:
+        
+        if 'CIEND' in record.INFO:
             end1, end2 = end+record.INFO['CIEND'][0], end+record.INFO['CIEND'][1]
         else:
             end1, end2 = end, end
