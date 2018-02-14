@@ -48,16 +48,23 @@ def upload_vcf(vcf_file):
             'info':{},
             'format':{},
             'filter':{},
+            'contig':{},
+            'alt':{},
             'metadata': dict(vcf.metadata)
         }
 
         # Store vcf metadata (from header)
         for info in vcf.infos:
-            vcf_metadata['info'][info] = {'num':vcf.infos[info].num,'desc':vcf.infos[info].desc}
+            vcf_metadata['info'][info] = {'num':vcf.infos[info].num,'desc':vcf.infos[info].desc, 'type':vcf.infos[info].type, 'source':vcf.infos[info].source, 'version':vcf.infos[info].version }
         for gt_format in vcf.formats:
-            vcf_metadata['format'][gt_format] = {'num':vcf.formats[gt_format].num,'desc':vcf.formats[gt_format].desc}
+            vcf_metadata['format'][gt_format] = {'num':vcf.formats[gt_format].num,'desc':vcf.formats[gt_format].desc, 'type': vcf.formats[gt_format].type}
         for filter in vcf.filters:
             vcf_metadata['filter'][filter] = vcf.filters[filter].desc
+        for contig in vcf.contigs:
+            vcf_metadata['contig'][contig] = vcf.contigs[contig].length
+        for alt in vcf.alts:
+            vcf_metadata['alt'][alt] = vcf.alts[alt].desc
+        
 
         # Convert all dot in metadata keys for compatibility with mongodb
         vcf_metadata = convert_dict_keys(vcf_metadata, dot_to_underscore)
@@ -72,19 +79,19 @@ def upload_vcf(vcf_file):
                 elif record.is_sv:
                     variant_id = '{}-{}-{}-{}-{}-{}'.format(variant['chr'], variant['pos'], variant['chr2'], variant['end'], variant['orientation'], variant['remoteOrientation'])
 
-        if variants_samples[variant_i]:
-            bulk_variants.find({'_id':variant_id}).upsert().update({
-            '$push': {'samples': {'$each': variants_samples[variant_i]}},
-            '$set': variant,
-            }            
-                )
-            variant_count += len(variants)
+                if variants_samples[variant_i]:
+                    bulk_variants.find({'_id':variant_id}).upsert().update({
+                    '$push': {'samples': {'$each': variants_samples[variant_i]}},
+                    '$set': variant,
+                    }            
+                        )
+                    variant_count += len(variants)
 
-            # Upload variants in bulk
-            if variant_count >= 10000:
-                bulk_variants.execute()
-                bulk_variants = db.variants.initialize_unordered_bulk_op()
-                variant_count = 0
+                    # Upload variants in bulk
+                    if variant_count >= 10000:
+                        bulk_variants.execute()
+                        bulk_variants = db.variants.initialize_unordered_bulk_op()
+                        variant_count = 0
 
         # insert remaining variants and insert vcf metadata to vcfs collection
         bulk_variants.execute()
@@ -114,18 +121,18 @@ def parse_vcf_record(vcf_record, vcf_metadata):
     # https://github.com/samtools/hts-specs/issues/77
     for alt_index, alt_allele in enumerate(vcf_record.ALT):
         if vcf_record.is_sv:
-            chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_sv_record( vcf_record, alt_index, alt_allele )
+            chr, pos, id, ref, alt, qual, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_sv_record( vcf_record, alt_index, alt_allele )
         variant = {
-        'chr' : chr,
-        'pos' : pos,
-        'ref' : ref,
-        'alt' : alt,            
-        'chr2' : chr2,
-        'end' : end,
-        'svlen' : svlen,
-        'svtype' : svtype,
-        'orientation' : orientation,
-        'remoteOrientation': remoteOrientation,
+            'chr' : chr,
+            'pos' : pos,
+            'ref' : ref,
+            'alt' : alt,            
+            'chr2' : chr2,
+            'end' : end,
+            'svlen' : svlen,
+            'svtype' : svtype,
+            'orientation' : orientation,
+            'remoteOrientation': remoteOrientation,
         }
         variants.append(variant)
 
@@ -140,20 +147,25 @@ def parse_vcf_record(vcf_record, vcf_metadata):
                     sample_var['genotype'] = sample_gt_data
                     sample_var['sample'] = sample_call.sample
                     sample_var['vcf_id'] = vcf_metadata['_id']
+                    sample_var['id'] = id
+                    sample_var['qual'] = qual
                     sample_var['info'] = vcf_record.INFO
+                    
                     if 'CIPOS' in vcf_record.INFO:
                         sample_var['info']['POS_RANGE'] = [ pos+vcf_record.INFO['CIPOS'][0], pos+vcf_record.INFO['CIPOS'][1] ]
-            else:
-                sample_var['info']['POS_RANGE'] = [ pos, pos ]
+                    else:
+                        sample_var['info']['POS_RANGE'] = [ pos, pos ]
             
-            if 'CIEND' in vcf_record.INFO:
-                sample_var['info']['END_RANGE'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
-            else:
-                sample_var['info']['END_RANGE'] = [ end, pos ]
-
+                    if 'CIEND' in vcf_record.INFO:
+                        sample_var['info']['END_RANGE'] = [ end+vcf_record.INFO['CIEND'][0], end+vcf_record.INFO['CIEND'][1] ]
+                    else:
+                        sample_var['info']['END_RANGE'] = [ end, pos ]
+            
+            #print( vcf_record.FILTER )
             # Set filter field
             if vcf_record.FILTER:
                 sample_var['filter'] = vcf_record.FILTER
+
 
             variant_samples.append(sample_var)
 
@@ -164,6 +176,8 @@ def parse_sv_record( vcf_record, alt_index, alt_allele ):
 
     pos, ref, alt = get_minimal_representation(vcf_record.POS, str(vcf_record.REF), str(alt_allele))
     chr = vcf_record.CHROM
+    id  = vcf_record.ID
+    qual = vcf_record.QUAL
         
     # If sv is a breakend
     if ( isinstance(vcf_record.ALT[0], py_vcf.model._Breakend) ) :
@@ -178,6 +192,7 @@ def parse_sv_record( vcf_record, alt_index, alt_allele ):
             chr2 = vcf_record.INFO['CHR2']
         else:
             chr2 = vcf_record.CHROM
+            
         if 'END' in vcf_record.INFO:
             end = vcf_record.INFO['END']
         else:
@@ -211,7 +226,7 @@ def parse_sv_record( vcf_record, alt_index, alt_allele ):
     elif svtype != 'BND':
         sys.exit("Cannot convert orientation and remoteOrientation")
     
-    return chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation
+    return chr, pos, id, ref, alt, qual, chr2, end, svlen, svtype, orientation, remoteOrientation
 
 
 def get_info_fields(record_info, info_fields):

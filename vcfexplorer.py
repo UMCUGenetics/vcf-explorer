@@ -19,6 +19,9 @@ def upload_vcf(args):
 
 def filter_vcf(args):
     utils.filter_vcf.filter_sv_vcf(args.vcf_file, args.flank, args.name, args.query, args.ori, args.count)
+
+def export_vcf(args):
+    utils.export_vcf.export( args.query )
     
 def resetdb(args):
     utils.database.resetdb()
@@ -42,6 +45,10 @@ if __name__ == "__main__":
     filter_vcf_args.add_argument('-o','--ori', action='store_true', help='Including orientation')
     filter_vcf_args.add_argument('-c','--count', default=1, type=int, help='Minimum number of hits in the database, before adding the filter flag [1]')
 
+    # Export vcf arguments
+    export_vcf_args = argparse.ArgumentParser(add_help=False)
+    export_vcf_args.add_argument('-q', '--query', default='', type=str, help='Filter query')
+
     # Server arguments
     server = argparse.ArgumentParser(add_help=False)
     server.add_argument('-host','--hostname', default='localhost', help='The hostname to listen on.')
@@ -55,6 +62,7 @@ if __name__ == "__main__":
     sp_runserver = sp.add_parser('runserver', parents=[server], help='Run flask development server')
     sp_import_vcf = sp.add_parser('import', parents=[import_vcf] ,help='Upload a vcf file to the database')
     sp_filter_vcf = sp.add_parser('filter', parents=[filter_vcf_args] ,help='Filter a vcf file using the database')
+    sp_export_vcf = sp.add_parser('export', parents=[export_vcf_args], help='Export a vcf file from the database')
     sp_resetdb = sp.add_parser('resetdb', help='Resetdb mongodb')
     sp_create_indexes = sp.add_parser('createindex', help='Create indexes')
 
@@ -63,6 +71,7 @@ if __name__ == "__main__":
     sp_filter_vcf.set_defaults(func=filter_vcf)
     sp_resetdb.set_defaults(func=resetdb)
     sp_create_indexes.set_defaults(func=create_indexes)
+    sp_export_vcf.set_defaults(func=export_vcf)
 
     args = parser.parse_args()
     args.func(args)
