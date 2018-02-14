@@ -31,8 +31,8 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
         vcf.infos['DB_Frequency'] = py_vcf.parser._Info('DB_Frequency', 1, 'Float', 'Variant frequency in database', 'vcf_explorer', '0.1')
         if filter_query:
             sample_match_query = re.match(r"^SAMPLE(=|\!=|\?=)\[?(\S+)\]?", filter_query)
-        if sample_match_query:
-            my_sample_query, my_sample_query_2 = query.create_sample_query( filter_query )
+            if sample_match_query:
+                my_sample_query, my_sample_query_2 = query.create_sample_query( filter_query )
     
         # output
         vcf_writer = py_vcf.Writer(sys.stdout, vcf)
