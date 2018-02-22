@@ -59,7 +59,7 @@ def filter_sv_vcf(vcf_file, flank=10, filter_name='DB', filter_query=False, filt
         
     for record in vcf:
         if record.is_sv:
-            chr, pos, ref, alt, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_vcf.parse_sv_record( record, 0, record.ALT )
+            chr, pos, id, ref, alt, qual, chr2, end, svlen, svtype, orientation, remoteOrientation = parse_vcf.parse_sv_record( record, 0, record.ALT )
         
         if 'CIPOS' in record.INFO:
             pos1, pos2 = pos+record.INFO['CIPOS'][0], pos+record.INFO['CIPOS'][1]
