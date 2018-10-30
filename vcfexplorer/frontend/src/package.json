@@ -32,7 +32,7 @@
         "es6-shim": "^0.35.0",
 
         "angular2-in-memory-web-api": "0.0.15",
-        "bootstrap": "^3.3.6",
+        #"bootstrap": "^3.3.6",
 
         "ag-grid": "5.2.x",
         "ag-grid-ng2": "5.2.x",
